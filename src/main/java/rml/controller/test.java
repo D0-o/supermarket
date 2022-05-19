@@ -29,4 +29,8 @@ public class test {
         System.out.println(id);
         System.out.println("123123");
     }
+
+    public void supertest(){
+        System.out.println("123");
+    }
 }
