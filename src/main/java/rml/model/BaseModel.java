@@ -7,13 +7,7 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * @author shc
- * @version 1.0
- * @Description: model基类
- * @Copyright 2019
- * @Created on 2019/12/18 22:07
- */
+
 @Data
 @ToString
 public class BaseModel implements Serializable {
