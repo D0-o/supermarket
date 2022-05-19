@@ -33,4 +33,7 @@ public class test {
     public void supertest(){
         System.out.println("123");
     }
+    public void supertest1(){
+        System.out.println("123");
+    }
 }
