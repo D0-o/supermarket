@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>商品编辑</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+</head>
+<body>
+<div class="nei_header">
+
+    <h3>商品编辑</h3>
+    <div class="rentu">
+        <img src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+    </div>
+    <i class="moix" onclick="upload()">导入</i>
+    <i class="moix" onclick="down()">模板</i>
+</div>
+<div style="display: none"><input type="file" id="uploadFile" onchange="uploadFile()"/></div>
+
+
+<div class="danju_con">
+
+    <div class="danju_left sbianji" style="width: 15%">
+        <div class="dan_title " style="text-align: center;border-right: 1px solid #84c44c; font-size: 18px; ">
+            分类列表
+        </div>
+
+        <div class="danju_lis fen_lei">
+            <ul>
+                <li class="on">通用商品</li>
+            </ul>
+            <div class="page">
+                <span>上页</span>
+                <span>1/1</span>
+                <span>下页</span>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <section style="position: absolute; left: 15%; top: 100px; width: 85%; height: 610px; overflow-y: auto;">
+        <div class="main_box">
+            <div class="cont_box editpro_box">
+                <!--财务报表-->
+                <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                    <thead>
+                    <tr>
+                        <th colspan="1">商品条码</th>
+                        <th colspan="2">商品名称</th>
+                        <th>库存(件)</th>
+                        <th>进货价(元)</th>
+                        <th>折扣价(元)</th>
+                        <th>销售价(元)</th>
+                        <th>创建人</th>
+                    </tr>
+
+                    </thead>
+                    <tbody id="goodsBody">
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+
+<!--底部-->
+
+<div class="mifooter">
+    <input type="text" id="goods" placeholder="条形码/商品名称">
+    <button class="duo_btn" onclick="query()">查询</button>
+    <button class="duo_btn" onclick="info()">新增</button>
+    <ol>
+        <li>
+            <p id="count">0</p>
+            商品数(个)
+        </li>
+        <li>
+            <p id="inventoryTotal">0</p>
+            总库存(件)
+        </li>
+        <li>
+            <p id="purchasePriceTotal">0</p>
+            总进价(元)
+        </li>
+        <li>
+            <p id="salesPriceTotal">0</p>
+            总售价(元)
+        </li>
+        <li>
+            <p id="discountTotal">0</p>
+            折扣价(元)
+        </li>
+    </ol>
+
+
+    <div class="page">
+        <span onclick="initTable(false)">上页</span>
+        <span id="pageText">1/1</span>
+        <span onclick="initTable(true)">下页</span>
+    </div>
+
+
+</div>
+
+<!--底部-->
+
+
+<!--编辑弹窗-->
+<div id="bakdate" class="popup">
+    <div class="mo_date" style="width: 700px; top: 45%; ">
+        <div class="mo_title">商品资料 <span class="fet_out" style="cursor: pointer">×</span></div>
+        <div class="bianjikuang">
+            <ul>
+                <li>
+                    条码：<input type="text" name="goodsCode"> <span onclick="generate()">生成</span>
+                    <p style="color: red" id="goodsCodeTab"></p>
+                </li>
+                <li>
+                    品名：<input type="text" name="goodsName">
+                    <p style="color: red" id="goodsNameTab"></p>
+                </li>
+                <li>
+                    销售价：<input type="text" name="salesPrice">
+                    <p style="color: red" id="salesPriceTab"></p>
+                </li>
+                <li>
+                    进货价：<input type="text" name="purchasePrice">
+                    <p style="color: red" id="purchasePriceTab"></p>
+                </li>
+                <li>
+                    分类：<select name="type" style="width: 167px; height: 34px;">
+                    <option value="1" selected>通用商品</option>
+
+                </select>
+                    <p style="color: red"></p>
+                </li>
+                <li>
+                    库&nbsp;&nbsp;&nbsp;存：<input type="text" name="inventory">
+                    <p style="color: red" id="inventoryTab"></p>
+                </li>
+
+                <li style="width: 100%">
+                    <div class="biji-content">
+                        <ul>
+                            <li>
+                                拼音码：<input type="text" name="pinyin">
+                                <p style="color: red"></p>
+                            </li>
+                            <li>
+                                供货商：<select name="supplier" style="width: 167px; height: 34px;">
+                                <option value="1" selected>老李水果店</option>
+                                <option value="2" selected>老王肉铺店</option>
+                                <option value="3" selected>老张五金店</option>
+                                <option value="4" selected>老马百货批发店</option>
+                            </select>
+                                <p style="color: red"></p>
+                            </li>
+                            <li>
+                                生产期：<input type="date" name="productionPeriod">
+                                <p style="color: red"></p>
+                            </li>
+                            <li>
+                                保质期/天：<input type="text" name="shelfLife">
+                                <p style="color: red" id="shelfLifeTab"></p>
+                            </li>
+                            <li style="width: 100%;">
+                                <ul>
+                                    <li>
+                                        商品状态：启用 <input type="radio" checked name="status" value="1"> 禁用：<input
+                                            type="radio" name="status" value="0">
+                                        <p style="color: red"></p>
+                                    </li>
+                                    <li>
+                                        优惠金额：<input name="discount" type="text" style="width: 90px;" value="0">
+                                        <p style="color: red" id="discountTab"></p>
+                                    </li>
+                                </ul>
+                                <div class="ssdr">
+                                    <textarea name="ramerk" cols="30" rows="10"
+                                              style="width: 100%; height: 80px;"></textarea>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <a class="biji-oth">
+                        <button class="kai_i">展开更多</button>
+                    </a>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="mo_btn">
+            <button style="background-color: #0099cb;" onclick="save()">确认</button>
+            <button style="background-color: #0099cb;" onclick="$('.popup').fadeOut()">取消</button>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script type="application/javascript">
+    var page = 0;
+    var total = 0;
+    var eid = 0;
+    var dataList = new Map();
+
+    function down() {
+        window.location = baseUrl + 'payfile/good.xlsx';
+    }
+
+    function upload() {
+        $("#uploadFile").click();
+    }
+
+    function uploadFile() {
+        var fd = new FormData();
+        fd.append("file", $("#uploadFile").get(0).files[0]);//上传的文件file
+        $.ajax({
+            url: baseUrl+ "goods/upload.do",
+            type:"post",
+            data:fd,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success:function(data){
+                let result = JSON.parse(data);
+                if(result.data){
+                    $.message({
+                        message: "导入成功",    //提示信息
+                        duration: 3000,
+                        type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                        showClose: false       //显示关闭按钮（默认：否）
+                    });
+                    query();
+                } else {
+                    $.message({
+                        message: "导入失败",    //提示信息
+                        duration: 3000,
+                        type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                        showClose: false       //显示关闭按钮（默认：否）
+                    });
+                }
+                $("#uploadFile").val("")
+            },
+            error:function(e){
+                $.message({
+                    message: "导入失败",    //提示信息
+                    duration: 3000,
+                    type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+            }
+        });
+    }
+
+    function generate() {
+        let goodsCode = "ZDY" + new Date().getTime();
+        $("*[name='goodsCode']").val(goodsCode);
+    }
+
+    function someFunction(result) {
+        let tableHtml = "";
+        if (result.list == null || result.list.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            if(page <= 1){
+                totalGoods(0,0,0,0,0);
+            }
+            return;
+        } else {
+            dataList = new Map();
+            for (let m of result.list) {
+                dataList.set(m.id + "", m);
+                tableHtml +=
+                    "<tr onclick=\"edit('" + m.id + "')\">" +
+                    "<td>" + m.goodsCode + "</td>" +
+                    "<td colspan='2'>" + m.goodsName + "</td>" +
+                    "<td>" + m.inventory + "</td>" +
+                    "<td>" + m.purchasePrice + "</td>" +
+                    "<td>" + (m.discount == null ? "无" : m.discount) + "</td>" +
+                    "<td>" + m.salesPrice + "</td>" +
+                    "<td>" + m.uname + "</td>" +
+                    "</tr>";
+            }
+        }
+        $("#goodsBody").html(tableHtml);
+        total = result.pages;
+        $("#pageText").text(page + "/" + total);
+    }
+
+    function totalFunction(result) {
+        totalGoods(result.countTotal, result.inventoryTotal,
+            result.purchasePriceTotal, result.salesPriceTotal, result.discountTotal);
+    }
+
+    function totalGoods(count, inventoryTotal,
+            purchasePriceTotal, salesPriceTotal, discountTotal) {
+        $("#count").text(count != null ? count : 0);
+        $("#inventoryTotal").text(inventoryTotal != null ? inventoryTotal : 0);
+        $("#purchasePriceTotal").text(purchasePriceTotal != null ? purchasePriceTotal : 0);
+        $("#salesPriceTotal").text(salesPriceTotal != null ? salesPriceTotal : 0);
+        $("#discountTotal").text(discountTotal != null ? discountTotal : 0);
+    }
+
+    function info() {
+        eid = 0;
+      $("*[name='goodsCode']").val("");
+      $("*[name='goodsName']").val("");
+      $("*[name='salesPrice']").val("");
+      $("*[name='purchasePrice']").val("");
+      $("*[name='type']").val("");
+      $("*[name='inventory']").val("");
+      $("*[name='pinyin']").val("");
+      $("*[name='supplier']").val("");
+      $("*[name='productionPeriod']").val("");
+      $("*[name='shelfLife']").val("");
+      $("*[name='status']").val("");
+      $("*[name='discount']").val("0");
+      $("*[name='ramerk']").val("");
+        showpop('#bakdate');
+    }
+
+    function query() {
+        page = 0;
+        total = 0;
+        initTable(true);
+        let goodsName = $("#goods").val();
+        cashierPost("goods/total.do", {goodsName: goodsName}, totalFunction);
+    }
+
+    function edit(id) {
+        let d = dataList.get(id);
+        eid = d.id;
+        $("*[name='goodsCode']").val(d.goodsCode);
+        $("*[name='goodsName']").val(d.goodsName);
+        $("*[name='salesPrice']").val(d.salesPrice);
+        $("*[name='purchasePrice']").val(d.purchasePrice);
+        $("*[name='type']").val(d.type);
+        $("*[name='inventory']").val(d.inventory);
+        $("*[name='pinyin']").val(d.pinyin);
+        $("*[name='supplier']").val(d.supplier);
+        $("*[name='productionPeriod']").val(d.productionPeriod);
+        $("*[name='shelfLife']").val(d.shelfLife);
+        $("*[name='status']").val(d.status);
+        $("*[name='discount']").val(d.discount);
+        $("*[name='ramerk']").val(d.ramerk);
+        showpop('#bakdate');
+    }
+
+    function save() {
+        let goodsCode = $("*[name='goodsCode']").val();
+        if (goodsCode == '') {
+            $("#goodsCodeTab").text("商品编码请输入！");
+            return;
+        } else {
+            $("#goodsCodeTab").text("");
+        }
+        let goodsName = $("*[name='goodsName']").val();
+        if (goodsName == '') {
+            $("#goodsNameTab").text("商品名称请输入！");
+            return;
+        } else {
+            $("#goodsNameTab").text("");
+        }
+        let salesPrice = $("*[name='salesPrice']").val();
+        if (!isNumber(salesPrice)) {
+            $("#salesPriceTab").text("销售价请输入数字！");
+            return;
+        } else {
+            $("#salesPriceTab").text("");
+        }
+        let purchasePrice = $("*[name='purchasePrice']").val();
+        if (!isNumber(purchasePrice)) {
+            $("#purchasePriceTab").text("进货价请输入数字！");
+            return;
+        } else {
+            $("#purchasePriceTab").text("");
+        }
+        let inventory = $("*[name='inventory']").val();
+        if (inventory == '') {
+            $("#inventoryTab").text("库存请输入！");
+            return;
+        }
+        if (!isIntNum(inventory)) {
+            $("#inventoryTab").text("库存请输入整数！");
+            return;
+        } else {
+            $("#inventoryTab").text("");
+        }
+        let shelfLife = $("*[name='shelfLife']").val();
+        if (shelfLife != '' && !isIntNum(shelfLife)) {
+            $("#shelfLifeTab").text("保质期请输入整数！");
+            return;
+        } else {
+            $("#shelfLifeTab").text("");
+        }
+        let discount = $("*[name='discount']").val();
+        if (discount != '' && !isNumber(discount)) {
+            $("#discountTab").text("折扣价请输入数字！");
+            return;
+        } else {
+            $("#discountTab").text("");
+        }
+        let d = {
+            id: eid,
+            goodsCode: goodsCode,
+            goodsName: goodsName,
+            salesPrice: salesPrice,
+            purchasePrice: purchasePrice,
+            type: $("*[name='type']").val(),
+            inventory: inventory,
+            pinyin: $("*[name='pinyin']").val(),
+            supplier: $("*[name='supplier']").val(),
+            productionPeriod: $("*[name='productionPeriod']").val(),
+            shelfLife: shelfLife,
+            status: $("*[name='status']").val(),
+            discount: discount,
+            ramerk: $("*[name='ramerk']").val()
+        }
+        let url = "goods/add.do";
+        if (eid > 0) {
+            url = "goods/update.do";
+        }
+        cashierPost(url, d, addFunction);
+    }
+
+    function addFunction(result) {
+        if (result) {
+            $.message({
+                message: "保存成功",    //提示信息
+                duration: 5000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            $('.popup').fadeOut();
+            query();
+        } else {
+            $.message({
+                message: "保存失败",    //提示信息
+                duration: 5000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+
+    $(function () {
+        $(".biji-content").hide();
+        //按钮点击事件
+        $(".kai_i").click(function () {
+            var txts = $(this).parents("li");
+            if ($(this).text() == "展开更多") {
+                $(this).text("以上展开部分为选填内容（收起）");
+                txts.find(".biji-tit").hide();
+                txts.find(".biji-content").show();
+            } else {
+                $(this).text("展开更多");
+                txts.find(".biji-tit").show();
+                txts.find(".biji-content").hide();
+            }
+        })
+    });
+    $(function () {
+        initTable(true)
+        let goodsName = $("#goods").val();
+        cashierPost("goods/total.do", {goodsName: goodsName}, totalFunction);
+    });
+
+    function initTable(b) {
+        if (b) {
+            if (total == 0 && page > 0) {
+                $.message({
+                    message: "无数据",    //提示信息
+                    duration: 3000,
+                    type: 'info',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            } else if (total != 0 && total == page) {
+                $.message({
+                    message: "已是末页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page++;
+        } else {
+            if (page == 1) {
+                $.message({
+                    message: "已是首页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page--;
+        }
+        let goodsName = $("#goods").val();
+        cashierPost("goods/list.do", {goodsName: goodsName, pageNo: page, pageSize: 10}, someFunction);
+    }
+
+
+    //弹框
+    function showpop(id) {
+        $(id).fadeIn();
+
+        var h = ($(window).height() - $(id).children('.popup-box').height()) / 2;
+        $(id).children('.popup-box').css('margin-top', h);
+    }
+
+    $('.fet_out').click(function () {
+        $('.popup').fadeOut();
+    });
+
+</script>
+<!--编辑弹窗-->
+
+</body>
+</html>

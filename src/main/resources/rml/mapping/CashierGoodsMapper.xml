@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierGoodsMapper">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from cashier_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="rml.model.CashierGoods">
+    insert into cashier_goods (goodsName, goodsCode,
+      salesPrice, purchasePrice, `type`,
+      inventory, pinyin, supplier,
+      productionPeriod, shelfLife, status,
+      discount, ramerk, createTime,
+      updateTime, uid, uname,
+      parentId)
+    values (#{goodsName,jdbcType=VARCHAR}, #{goodsCode,jdbcType=VARCHAR},
+      #{salesPrice,jdbcType=DECIMAL}, #{purchasePrice,jdbcType=DECIMAL}, #{type,jdbcType=INTEGER},
+      #{inventory,jdbcType=INTEGER}, #{pinyin,jdbcType=VARCHAR}, #{supplier,jdbcType=INTEGER},
+      #{productionPeriod,jdbcType=VARCHAR}, #{shelfLife,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+      #{discount,jdbcType=DECIMAL}, #{ramerk,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+      #{updateTime,jdbcType=TIMESTAMP}, #{uid,jdbcType=BIGINT}, #{uname,jdbcType=VARCHAR},
+      #{parentId,jdbcType=BIGINT})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="rml.model.CashierGoods">
+        update cashier_goods
+        <set>
+            <if test="goodsName != null and '' != goodsName">
+                goodsName = #{goodsName,jdbcType=VARCHAR},
+            </if>
+            <if test="goodsCode != null and '' != goodsCode">
+                goodsCode = #{goodsCode,jdbcType=VARCHAR},
+            </if>
+            <if test="salesPrice != null">
+                salesPrice = #{salesPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="purchasePrice != null">
+                purchasePrice = #{purchasePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="type != null">
+                `type` = #{type},
+            </if>
+            <if test="inventory != null">
+                inventory = #{inventory,jdbcType=INTEGER},
+            </if>
+            <if test="pinyin != null and '' != pinyin">
+                pinyin = #{pinyin,jdbcType=VARCHAR},
+            </if>
+            <if test="supplier != null">
+                supplier = #{supplier,jdbcType=INTEGER},
+            </if>
+            <if test="productionPeriod != null and '' != productionPeriod">
+                productionPeriod = #{productionPeriod,jdbcType=VARCHAR},
+            </if>
+            <if test="shelfLife != null">
+                shelfLife = #{shelfLife,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="discount != null">
+                discount = #{discount,jdbcType=DECIMAL},
+            </if>
+            <if test="ramerk != null and '' != ramerk">
+                ramerk = #{ramerk,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="uid != null">
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="uname != null and '' != uname">
+                uname = #{uname,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByCode" parameterType="rml.model.CashierGoods">
+        update cashier_goods
+        <set>
+            <if test="goodsName != null and '' != goodsName">
+                goodsName = #{goodsName,jdbcType=VARCHAR},
+            </if>
+            <if test="salesPrice != null">
+                salesPrice = #{salesPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="purchasePrice != null">
+                purchasePrice = #{purchasePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="type != null">
+                `type` = #{type},
+            </if>
+            <if test="inventory != null">
+                inventory = inventory + #{inventory,jdbcType=INTEGER},
+            </if>
+            <if test="pinyin != null and '' != pinyin">
+                pinyin = #{pinyin,jdbcType=VARCHAR},
+            </if>
+            <if test="supplier != null">
+                supplier = #{supplier,jdbcType=INTEGER},
+            </if>
+            <if test="productionPeriod != null and '' != productionPeriod">
+                productionPeriod = #{productionPeriod,jdbcType=VARCHAR},
+            </if>
+            <if test="shelfLife != null">
+                shelfLife = #{shelfLife,jdbcType=INTEGER},
+            </if>
+            <if test="discount != null">
+                discount = #{discount,jdbcType=DECIMAL},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="uid != null">
+                uid = #{uid,jdbcType=BIGINT},
+            </if>
+            <if test="uname != null and '' != uname">
+                uname = #{uname,jdbcType=VARCHAR},
+            </if>
+            <if test="parentId != null">
+                parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </set>
+        where goodsCode = #{goodsCode,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" resultType="rml.model.CashierGoods" parameterType="rml.model.CashierGoods">
+        select id, goodsName, goodsCode, salesPrice, purchasePrice, `type`, inventory, pinyin,
+        supplier, productionPeriod, shelfLife, status, discount, ramerk, createTime, updateTime,
+        uid, uname, parentId
+        from cashier_goods
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+        </where>
+    </select>
+    <select id="selectAll" resultType="rml.model.CashierGoods" parameterType="rml.model.CashierGoods">
+        select id, goodsName, goodsCode, salesPrice, purchasePrice, `type`, inventory, pinyin,
+        supplier, productionPeriod, shelfLife, status, discount, ramerk, createTime, updateTime,
+        uid, uname, parentId
+        from cashier_goods
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="goodsName != null and '' != goodsName">
+                and goodsName like CONCAT('%',#{goodsName},'%')
+            </if>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="type != null">
+                and `type` = #{type}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid,jdbcType=BIGINT}
+            </if>
+            <if test="codes != null and codes.size > 0">
+                and goodsCode in
+                <foreach collection="codes" index="index" item="item" open="("
+                         separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="selectTotal" resultType="rml.model.CashierGoodsTotal" parameterType="rml.model.CashierGoods">
+        select
+        count(distinct goodsCode) as countTotal,
+        sum(salesPrice) as salesPriceTotal,
+        sum(purchasePrice) as purchasePriceTotal,
+        sum(inventory) as inventoryTotal,
+        sum(discount) as discountTotal
+        from cashier_goods
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="goodsName != null and '' != goodsName">
+                and goodsName like CONCAT('%',#{goodsName},'%')
+            </if>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="type != null">
+                and `type` = #{type}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+</mapper>

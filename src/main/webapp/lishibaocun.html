@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>商品历史报损</title>
+
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/bignumber.js"></script>
+</head>
+<body >
+<div class="nei_header" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+
+    <h3>商品历史报损</h3>
+     <div class="rentu">
+         <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+     </div>
+</div>
+
+<section style="padding-bottom: 200px; padding-top: 100px">
+    <div class="main_box">
+        <div class="cont_box editpro_box">
+            <!--财务报表-->
+            <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                <thead>
+                <tr>
+                    <th>商品条码</th>
+                    <th>商品名称</th>
+                    <th>分类</th>
+                    <th>进货价(元)</th>
+                    <th>报损量</th>
+                    <th>备注</th>
+                    <th>报损人</th>
+                    <th>时间</th>
+                </tr>
+                </thead>
+                <tbody id="goodsBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+
+
+<footer class="footer">
+
+    <div class="lst">
+        <ul>
+            <li>
+                <div class="saoma">
+                    <label > <input id="goods" type="text" placeholder="条形码/名称"> <span>扫码模式</span> </label>
+                </div>
+            </li>
+
+            <li>
+                <div class="moli" >
+                    <ul  style="width: 300px">
+                        <li style="width: 33%">
+                            <p id="total">0条</p>
+                            <p>条数</p>
+                        </li>
+                        <li style="width: 33%; border-right: 1px solid #0099cb;">
+                            <p id="totalSum">0件</p>
+                            <p>总报损</p>
+                        </li>
+                        <li style="width: 33%">
+                            <p id="purchasePrice">0元</p>
+                            <p>总进价</p>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <div style="width: 400px;border: none;margin-top: 10px;margin-left: 10px">
+                    时间：<input id="sTime" type="datetime-local">-<input id="eTime" type="datetime-local">
+                </div>
+            </li>
+            <li  class="right_mo">
+                <div class="right_2" style="float: right; ">
+                    <button style="background-color: #548e1d;" onclick="query()">查询</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+</body>
+<script type="application/javascript">
+
+    var dataList = [];
+
+    function query() {
+        let goods = $("#goods").val();
+        let sTime = $("#sTime").val();
+        let eTime = $("#eTime").val();
+        if (goods == "" && sTime == "" && eTime == "") {
+            $.message({
+                message: "至少输入1个条件",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            cashierPost("lossgoods/list.do", {goodsName: goods, sTime: sTime, eTime: eTime}, someFunction);
+        }
+    }
+    function someFunction(result) {
+        let tableHtml = "";
+        if (result == null || result.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            for (let m of result) {
+                tableHtml +=
+                    "<tr>" +
+                    "<td>" + m.goodsName + "</td>" +
+                    "<td>" + m.goodsCode + "</td>" +
+                    "<td>" + m.type + "</td>" +
+                    "<td>" + m.purchasePrice + "</td>" +
+                    "<td>" + m.reportLoss + "</td>" +
+                    "<td>" + m.ramerk + "</td>" +
+                    "<td>" + m.uname + "</td>" +
+                    "<td>" + crtTimeFtt(m.createTime) + "</td>" +
+                    "</tr>";
+            }
+        }
+        $("#goodsBody").html(tableHtml);
+        dataList = result;
+        initSum();
+    }
+    function crtTimeFtt(value){
+        let crtTime = new Date(value);
+        return dateFtt("yyyy-MM-dd hh:mm:ss",crtTime);//直接调用公共JS里面的时间类处理的办法
+    }
+    function initSum() {
+        let total = 0;
+        let totalSum = 0;
+        let purchasePrice = 0;
+        for(let value of dataList){
+            total++;
+            totalSum += (value.reportLoss == null ? 0 : parseInt(value.reportLoss));
+            purchasePrice = new BigNumber(purchasePrice).plus(value.purchasePrice == null ? 0 : parseFloat(value.purchasePrice)) - 0;
+        }
+        $("#purchasePrice").text(purchasePrice + "元");
+        $("#totalSum").text(totalSum + "件");
+        $("#total").text(total + "条");
+    }
+</script>
+</html>

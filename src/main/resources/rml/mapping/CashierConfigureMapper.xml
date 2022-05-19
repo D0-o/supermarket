@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierConfigureMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_configure
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierConfigure" >
+    insert into cashier_configure (id, code, json, 
+      status, updateTime)
+    values (#{id,jdbcType=BIGINT}, #{code,jdbcType=VARCHAR}, #{json,jdbcType=VARCHAR}, 
+      #{status,jdbcType=INTEGER}, #{updatetime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierConfigure" >
+    update cashier_configure
+    set json = #{json,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      updateTime = #{updatetime,jdbcType=TIMESTAMP}
+    where code = #{code,jdbcType=VARCHAR}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierConfigure" parameterType="rml.model.CashierConfigure" >
+    select id, code, json, status, updateTime
+    from cashier_configure
+    where code = #{code,jdbcType=VARCHAR}
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierConfigure" >
+    select id, code, json, status, updateTime
+    from cashier_configure
+  </select>
+</mapper>

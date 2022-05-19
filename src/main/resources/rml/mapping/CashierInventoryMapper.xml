@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierInventoryMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_inventory
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierInventory" >
+    insert into cashier_inventory (inventoryNo, inventoryTime,
+      beforeInventory, afterInventory, difference,
+      status, ramerk, createTime,
+      uid, uname, parentId)
+    values (#{inventoryNo,jdbcType=VARCHAR}, #{inventoryTime,jdbcType=DATE},
+      #{beforeInventory,jdbcType=INTEGER}, #{afterInventory,jdbcType=INTEGER}, #{difference,jdbcType=INTEGER},
+      #{status,jdbcType=INTEGER}, #{ramerk,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+      #{uid,jdbcType=BIGINT}, #{uname,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierInventory" >
+    update cashier_inventory
+    set inventoryNo = #{inventoryNo,jdbcType=VARCHAR},
+      inventoryTime = #{inventoryTime,jdbcType=DATE},
+      beforeInventory = #{beforeInventory,jdbcType=INTEGER},
+      afterInventory = #{afterInventory,jdbcType=INTEGER},
+      difference = #{difference,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      ramerk = #{ramerk,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      uid = #{uid,jdbcType=BIGINT},
+      uname = #{uname,jdbcType=VARCHAR},
+      parentId = #{parentId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierInventory" parameterType="rml.model.CashierInventory" >
+    select id, inventoryNo, inventoryTime, beforeInventory, afterInventory, difference,
+    status, ramerk, createTime, uid, uname, parentId
+    from cashier_inventory
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="inventoryNo != null and '' != inventoryNo">
+        and inventoryNo = #{inventoryNo,jdbcType=VARCHAR}
+      </if>
+      <if test="inventoryTime != null">
+        and inventoryTime = #{inventoryTime,jdbcType=DATE}
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierInventory" parameterType="rml.model.CashierInventory" >
+    select id, inventoryNo, inventoryTime, beforeInventory, afterInventory, difference,
+    status, ramerk, createTime, uid, uname, parentId
+    from cashier_inventory
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="inventoryNo != null and '' != inventoryNo">
+        and inventoryNo = #{inventoryNo,jdbcType=VARCHAR}
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+      <if test="inventoryTime != null">
+        and inventoryTime = #{inventoryTime,jdbcType=DATE}
+      </if>
+      <if test="status != null">
+        and status = #{status,jdbcType=INTEGER}
+      </if>
+    </where>
+  </select>
+  <update id="updateGoodsNum"  parameterType="rml.model.CashierInventory">
+    UPDATE
+    cashier_goods d
+    INNER JOIN
+    cashier_inventory_goods g ON d.parentId = #{parentId,jdbcType=BIGINT} AND d.goodsCode = g.goodsCode
+    INNER JOIN
+    cashier_inventory i ON i.inventoryTime = #{inventoryTime,jdbcType=DATE} AND d.parentId = i.parentId AND i.inventoryNo = g.inventoryNo
+    SET d.inventory = CASE WHEN g.afterInventory <![CDATA[ < ]]> d.inventory THEN d.inventory ELSE g.afterInventory END
+    WHERE
+    d.parentId = #{parentId,jdbcType=BIGINT}
+  </update>
+
+  <update id="upInventory"  parameterType="String">
+    UPDATE cashier_inventory c
+    set
+      c.beforeInventory =(SELECT sum(beforeInventory) from cashier_inventory_goods where inventoryNo=#{inventoryNo,jdbcType=VARCHAR}),
+      c.afterInventory=(SELECT sum(afterInventory) from cashier_inventory_goods where inventoryNo=#{inventoryNo,jdbcType=VARCHAR}),
+      c.difference=(c.beforeInventory-c.afterInventory)
+    where inventoryNo=#{inventoryNo,jdbcType=VARCHAR}
+  </update>
+</mapper>

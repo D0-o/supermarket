@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
+  <title>订单完成</title>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/message.js"></script>
+  <script src="js/LodopFuncs.js"></script>
+  <script src="js/bignumber.js"></script>
+</head>
+
+<body>
+<div class="nei_header">
+  <h3>支付完成&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3>
+  <div class="rentu">
+    <img id="s" src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+    <img id="f" src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+  </div>
+  <i class="moix" onclick="print()">打印</i>
+</div>
+<div style="text-align:center;width: 100%;margin:10px auto;">
+  <img id="payImage" src="images/wancheng.jpg" width="20%" href="20%"/>
+  <h4 style="color: green; text-align: center;margin-top:10px;" id="text">支付成功</h4>
+</div>
+
+</body>
+<script type="application/javascript">
+    var orderId = null;
+    var order = null;
+    var printData = null;
+    var account = window.sessionStorage.getItem("account");
+    var user = JSON.parse(account);
+    function someFunction(result) {
+        if(result != null){
+            $("#payImage").attr("src",result.image);
+            $("#text").text(result.text);
+            if (result.status == 0) {
+                $("#text").attr("style","color: red; text-align: center;margin-top:10px;")
+                $("#s").hide();
+                $("#f").show();
+            } else {
+                if (printData.auto == 1) {
+                    print();
+                }
+            }
+        } else {
+            $.message({
+                message: "订单异常无法支付",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+
+    }
+
+    $(function () {
+        $("#f").hide();
+        cashierPost("conf/get.do", {code: '1'}, confFunction);
+        let request = getRequestId(location.search);
+        orderId = request['id']; //ID
+        cashierPost("order/get.do", {orderId: orderId}, orderFunction);
+        cashierPost("order/pay.do", {orderId: orderId}, someFunction);
+    });
+    
+    function confFunction(result) {
+        if (result != null) {
+            printData = JSON.parse(result.json);
+        }
+    }
+    
+    function orderFunction(result) {
+        order = result;
+    }
+    
+    function print() {
+        if(orderId == null || orderId == '' || orderId == undefined){
+            $.message({
+                message: "订单异常无法支付",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            cashierPost("detail/list.do", {orderId: orderId}, prinTpreview);
+        }
+    }
+
+    function prinTpreview(result) {
+      if(printData - 0 == 0){
+          $.message({
+              message: "打印设置未生效",    //提示信息
+              duration: 3000,
+              type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+              showClose: false       //显示关闭按钮（默认：否）
+          });
+          return;
+      }
+      var LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+      LODOP.PRINT_INIT("超市打印");
+      let row  = "";
+      for (let m of result) {
+        row +=
+         `
+          <tr>
+            <td style="font-size: 0.7em;font-weight: bold" colspan="4">${m.goodsName}</td>
+          </tr>
+          <tr>
+            <td style="font-size: 0.7em;text-align: left;font-weight: bold">${m.goodsCode}</td>
+            <td style="font-size: 0.7em;font-weight: bold">${m.num}</td>
+            <td style="font-size: 0.7em;font-weight: bold">${m.currentPrice}</td>
+            <td style="font-size: 0.7em;text-align: right;font-weight: bold">${m.subtotal}</td>
+          </tr>
+        `;
+      }
+      let t =
+        `
+       <table id="LODOP_OB" style="width: 240px;">
+        <thead>
+            <tr>
+              <th colspan="4" style="font-size: 1.1em;font-weight: bold">${printData.title}</th>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 0.7em;">收银员: ${user.id}</td>
+              <td colspan="2" style="font-size: 0.7em;text-align: right;">机器号: ${printData.machine}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size: 0.7em;">消费时间: ${dateFtt("yyyy-MM-dd hh:mm:ss", new Date(order.orderTime))}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.7em;">流水号: ${order.orderId}</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+              <th style="font-size: 0.7em;text-align: left;">商品名</th>
+              <th style="font-size: 0.7em;">数量</th>
+              <th style="font-size: 0.7em;">单价</th>
+              <th style="font-size: 0.7em;text-align: right;">小计</th>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${row}
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+                <td colspan="2" style="font-size: 0.7em;font-weight: bold">数量合计: ${order.num}</td>
+                <td colspan="2" style="font-size: 0.7em;text-align: right;font-weight: bold">总金额: ${order.amount}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size: 0.7em;text-align: right;font-weight: bold">优惠金额: ${order.fictitious}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.7em;text-align: right;font-weight: bold">找零金额: ${order.giveChange}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 0.7em;font-weight: bold">支付类型: ${ getPayTyte(order.payType)}</td>
+              <td colspan="2" style="font-size: 0.7em;text-align: right;font-weight: bold">实付金额: ${order.actualPay}</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">地址: ${printData.address}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">电话: ${printData.tel}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">${printData.ramerk}</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="font-size: 0.8em;font-weight: bold">谢谢惠顾</th>
+            </tr>
+            <tr>
+              <th colspan="4" style="font-size: 0.8em;font-weight: bold">欢迎下次光临</th>
+            </tr>
+        </tbody>
+      </table>
+    `;
+
+      LODOP.ADD_PRINT_HTM(10, 10, 200, 340 + 35 * result.length, t);
+      if(printData.preview == 1) {
+          LODOP.PREVIEW();
+      } else {
+          LODOP.PRINT();
+      }
+    }
+    function getPayTyte(type) {
+        if(type == 'ZFB'){
+            return '支付宝';
+        }else if(type == 'WX') {
+            return '微信';
+        } else {
+          return '现金';
+        }
+    }
+</script>
+</html>

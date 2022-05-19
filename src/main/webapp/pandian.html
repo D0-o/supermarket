@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>盘点模式</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+
+</head>
+<body>
+<div class="nei_header">
+
+    <h3>盘点模式</h3>
+    <div class="rentu">
+        <img src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+    </div>
+    <div class="jix">
+        <a href="pandianlishi.html">盘点历史>></a>
+    </div>
+</div>
+
+
+<div class="danju_con">
+
+    <div class="danju_left sbianji" style="width: 15%">
+        <div class="dan_title " style="text-align: center;border-right: 1px solid #84c44c; font-size: 18px; ">
+            分类列表
+        </div>
+
+        <div class="danju_lis fen_lei">
+            <ul>
+                <li class="on">通用商品</li>
+            </ul>
+            <div class="page">
+                <span>上页</span>
+                <span>1/1</span>
+                <span>下页</span>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <section id="goodsSection" style="position: absolute; left: 15%; top: 100px; width: 85%; height: 600px; overflow-y: auto;">
+        <div class="main_box">
+            <div class="cont_box editpro_box">
+                <!--财务报表-->
+                <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                    <thead>
+                    <tr>
+                        <th>商品条码</th>
+                        <th>商品名称</th>
+                        <th>原价(元)</th>
+                        <th>盘前库存(个)</th>
+                        <th>差异库存(个)</th>
+                        <th>盘后库存(个)</th>
+                    </tr>
+
+                    </thead>
+                    <tbody id="goodsBody">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+
+<!--底部-->
+
+
+<footer class="footer" style="width: 85%; left: 15%;">
+
+    <div class="lst loxt">
+        <ul>
+            <li>
+                <div class="saoma">
+                    <label> <input type="text" id="goodsCode" onchange="queryGoods()" placeholder="商品编码"> <span>扫码模式</span> </label>
+                </div>
+            </li>
+
+            <li>
+                <div class="moli">
+                    <ul>
+                        <li>
+                            <p id="purchasePrice">0</p>
+                            <p>总金额</p>
+                        </li>
+                        <li>
+                            <p id="beforeInventory">0</p>
+                            <p>盘点前</p>
+                        </li>
+                        <li>
+                            <p id="afterInventory">0</p>
+                            <p>未盘点</p>
+                        </li>
+
+
+                    </ul>
+                </div>
+            </li>
+            <li class="right_mo">
+                <div class="right_2">
+                    <button onclick="save()">(2)提交库存</button>
+                </div>
+            </li>
+            <li class="right_mo">
+                <div class="right_2">
+                    <button onclick="confirm()">(1)确认盘点</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+<!--底部-->
+
+
+<script type="application/javascript">
+
+    var dataList = new Map();
+    var ch = false;
+    var inventoryNUm = 0;
+    var afterInventory = 0;
+    var num = 0;
+    var loading = false;
+
+    function confirm() {
+        ch = true;
+        inventoryNUm = 0;
+        for (let key of dataList) {
+            let value = key[1]
+            if (value.afterInventory == undefined || value.afterInventory == null || value.afterInventory == 0) {
+                $.message({
+                    message: key[0] + "请输入盘点数量！",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+        }
+        $.message({
+            message: "已确认盘点,后不可修改盘点后库存！",    //提示信息
+            duration: 4000,
+            type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+            showClose: false       //显示关闭按钮（默认：否）
+        });
+    }
+
+    function save() {
+        let list = [];
+        let i = 0;
+        if (dataList.size > 0) {
+            for (let key of dataList) {
+                let value = key[1]
+                if (value.afterInventory == undefined || value.afterInventory == null || value.afterInventory == 0) {
+                    $.message({
+                        message: key[0] + "请输入盘点数量！",    //提示信息
+                        duration: 3000,
+                        type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                        showClose: false       //显示关闭按钮（默认：否）
+                    });
+                    return;
+                }
+                list[i] = value;
+                i++;
+            }
+        }
+        cashierPost("inventory/add.do", {order: JSON.stringify(list)}, saveFunction);
+    }
+
+    function saveFunction(result) {
+        if (result) {
+            $.message({
+                message: "盘点成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            dataList = new Map();
+            ch = false;
+            $("#goodsBody").html("");
+            inventoryNUm = 0;
+            $("#inventoryNUm").text(inventoryNUm);
+            afterInventory = 0;
+            $("#afterInventory").text(afterInventory);
+            num = 0;
+            $("#num").text(num);
+        } else {
+            $.message({
+                message: "失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function query() {
+        let goodsCode = $("#goodsCode").val();
+        cashierPost("inventory/check.do", {goodsCode: goodsCode}, someFunction);
+    }
+
+    var page = 1;
+    var total = false;
+    function queryGoods() {
+        loading = true
+        page = 1;
+        total = false;
+        $("#goodsBody").html("");
+        let goodsCode = $("#goodsCode").val();
+        cashierPost("inventory/checkList.do", {goodsCode: goodsCode,page: page}, queryFunction);
+    }
+
+    function queryFunction(result) {
+        let tableHtml = "";
+        loading = false;
+        if (result.list == null || result.list.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            total = true;
+            return;
+        } else {
+            for (let m of result.list) {
+                tableHtml +=
+                    `
+                    <tr>
+                        <td>${m.goodsCode}</td>
+                        <td>${m.goodsName}</td>
+                        <td>${m.purchasePrice}</td>
+                        <td>${m.beforeInventory}</td>
+                        <td>${m.difference == 0 ? "无" : m.difference}</td>
+                        <td><input type="text" onchange="resetInventory(this,'${m.goodsCode}','${m.afterInventory}')" value="${m.afterInventory}" /></td>
+                    </tr>
+                    `;
+            }
+        }
+        $("#goodsBody").html(tableHtml);
+    }
+
+    function init(b) {
+        if (b) {
+            page = 0;
+            total = false;
+            $("#goodsBody").html("");
+        }
+        if (total) {
+            return;
+        }
+        page++;
+        let goodsCode = $("#goodsCode").val();
+        cashierPost("inventory/checkList.do", {goodsCode: goodsCode,page: page}, listFunction);
+    }
+
+    function listFunction(result) {
+        let tableHtml = "";
+        loading = false;
+        if (result.list == null || result.list.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            total = true;
+            return;
+        } else {
+            for (let m of result.list) {
+                tableHtml +=
+                    `
+                    <tr>
+                        <td>${m.goodsCode}</td>
+                        <td>${m.goodsName}</td>
+                        <td>${m.purchasePrice}</td>
+                        <td>${m.beforeInventory}</td>
+                        <td>${m.difference == 0 ? "无" : m.difference}</td>
+                        <td><input type="text" onchange="resetInventory(this,'${m.goodsCode}','${m.afterInventory}')" value="${m.afterInventory}" /></td>
+                    </tr>
+                    `;
+            }
+        }
+        $("#goodsBody").append(tableHtml);
+    }
+
+    function someFunction(result) {
+        let tableHtml = "";
+        if (result == null || result.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            for (let m of result) {
+                tableHtml +=
+                    `
+                    <tr>
+                        <td>${m.goodsCode}</td>
+                        <td>${m.goodsName}</td>
+                        <td>${m.purchasePrice}</td>
+                        <td>${m.beforeInventory}</td>
+                        <td>${m.difference == 0 ? "无" : m.difference}</td>
+                        <td><input type="text" onchange="resetInventory(this,'${m.goodsCode}','${m.afterInventory}')" value="${m.afterInventory}" /></td>
+                    </tr>
+                    `;
+            }
+            cashierPost("inventory/sum.do", {}, sumFunction);
+        }
+        $("#goodsBody").html(tableHtml);
+    }
+
+    function sumFunction(result) {
+        $("#purchasePrice").text(result.purchasePrice);
+        $("#beforeInventory").text(result.beforeInventory);
+        $("#afterInventory").text(result.afterInventory);
+        $('#goodsSection').scroll(function() {
+            var range = 10;
+            var t = $('#goodsSection').scrollTop();
+            var h = $('#goodsSection').height();
+            var scrollHeight = $('#table_box').height();
+            console.info(scrollHeight + '\t' + t + '\t')
+            if (t + h >= scrollHeight) {
+                if (loading) return;
+                loading = true;
+                init(false);
+            }
+        })
+    }
+    function resetInventory(input, goodsCode, afterInventory) {
+        let g = {
+            goodsCode: goodsCode,
+            afterInventory: afterInventory
+        }
+        if(ch){
+            input.value = g.afterInventory;
+            $.message({
+                message: "已确认库存不可修改",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            g.afterInventory = input.value;
+            dataList.set(g.goodsCode,g);
+        }
+    }
+
+    $(function () {
+        query();
+    });
+</script>
+
+</body>
+</html>

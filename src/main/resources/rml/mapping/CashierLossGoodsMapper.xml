@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierLossGoodsMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_loss_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierLossGoods" >
+    insert into cashier_loss_goods (goodsName, goodsCode,
+      purchasePrice, `type`, reportLoss,
+      ramerk, createTime, uid, 
+      uname, parentId)
+    values (#{goodsName,jdbcType=VARCHAR}, #{goodsCode,jdbcType=VARCHAR},
+      #{purchasePrice,jdbcType=DECIMAL}, #{type,jdbcType=INTEGER}, #{reportLoss,jdbcType=INTEGER},
+      #{ramerk,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{uid,jdbcType=BIGINT},
+      #{uname,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierLossGoods" >
+    update cashier_loss_goods
+    set goodsName = #{goodsName,jdbcType=VARCHAR},
+      goodsCode = #{goodsCode,jdbcType=VARCHAR},
+      purchasePrice = #{purchasePrice,jdbcType=DECIMAL},
+      `type` = #{type,jdbcType=INTEGER},
+      reportLoss = #{reportLoss,jdbcType=INTEGER},
+      ramerk = #{ramerk,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      uid = #{uid,jdbcType=BIGINT},
+      uname = #{uname,jdbcType=VARCHAR},
+      parentId = #{parentId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierLossGoods" parameterType="java.lang.Long" >
+    select id, goodsName, goodsCode, purchasePrice, `type`, reportLoss, ramerk, createTime,
+    uid, uname, parentId
+    from cashier_loss_goods
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierLossGoods" >
+    select id, goodsName, goodsCode, purchasePrice, `type`, reportLoss, ramerk, createTime,
+    uid, uname, parentId
+    from cashier_loss_goods
+    <where>
+      <if test="id != null">
+        and id = #{id}
+      </if>
+      <if test="goodsName != null and '' != goodsName">
+        and goodsName like CONCAT('%',#{goodsName},'%')
+      </if>
+      <if test="goodsCode != null and '' != goodsCode">
+        and goodsCode = #{goodsCode}
+      </if>
+      <if test="type != null">
+        and `type` = #{type}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="sTime != null and '' != sTime">
+        and createTime <![CDATA[ >= ]]> #{sTime,jdbcType=VARCHAR}
+      </if>
+      <if test="eTime != null and '' != eTime">
+        and createTime <![CDATA[ <= ]]> #{eTime,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+</mapper>

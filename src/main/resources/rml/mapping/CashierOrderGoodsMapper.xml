@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierOrderGoodsMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_order_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierOrderGoods" >
+    insert into cashier_order_goods (orderId, goodsCode,
+    goodsName, num, costPrice,
+    discount, currentPrice, `type`,
+    subtotal, createTime)
+    values (#{orderId,jdbcType=VARCHAR}, #{goodsCode,jdbcType=VARCHAR},
+    #{goodsName,jdbcType=VARCHAR}, #{num,jdbcType=INTEGER}, #{costPrice,jdbcType=DECIMAL},
+    #{discount,jdbcType=DECIMAL}, #{currentPrice,jdbcType=DECIMAL}, #{type,jdbcType=INTEGER},
+    #{subtotal,jdbcType=DECIMAL}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierOrderGoods" >
+    update cashier_order_goods
+    set orderId = #{orderId,jdbcType=VARCHAR},
+      goodsCode = #{goodsCode,jdbcType=VARCHAR},
+      goodsName = #{goodsName,jdbcType=VARCHAR},
+      num = #{num,jdbcType=INTEGER},
+      costPrice = #{costPrice,jdbcType=DECIMAL},
+      discount = #{discount,jdbcType=DECIMAL},
+      currentPrice = #{currentPrice,jdbcType=DECIMAL},
+      `type` = #{type,jdbcType=INTEGER},
+      subtotal = #{subtotal,jdbcType=DECIMAL},
+      createTime = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierOrderGoods" parameterType="java.lang.Long" >
+    select id, orderId, goodsCode, goodsName, num, costPrice, discount, currentPrice,
+    `type`, subtotal, createTime
+    from cashier_order_goods
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+<select id="selectByOrderId" resultType="rml.model.CashierOrderGoods" parameterType="String" >
+    select id, orderId, goodsCode, goodsName, num, costPrice, discount, currentPrice,
+           `type`, subtotal, createTime
+    from cashier_order_goods
+    where orderId = #{orderId,jdbcType=VARCHAR}
+</select>
+  <select id="selectAll" resultType="rml.model.CashierOrderGoods" parameterType="rml.model.CashierOrderGoods">
+    select id, orderId, goodsCode, goodsName, num, costPrice, discount, currentPrice,
+    `type`, subtotal, createTime
+    from cashier_order_goods
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null and '' != orderId">
+        and orderId = #{orderId,jdbcType=VARCHAR}
+      </if>
+      <if test="goodsName != null and '' != goodsName">
+        and goodsName like CONCAT('%',#{goodsName},'%')
+      </if>
+      <if test="goodsCode != null and '' != goodsCode">
+        and goodsCode = #{goodsCode}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectReports" resultType="rml.model.CashierOrderGoods" parameterType="rml.model.CashierReports">
+      select d.id, d.orderId, d.goodsCode, d.goodsName, d.num, d.costPrice, d.discount, d.currentPrice,
+      d.`type`, d.subtotal, d.createTime
+      from cashier_order_goods d inner join cashier_order o on o.orderId = d.orderId
+      <where>
+          o.status = 1
+          <if test="orderId != null and '' != orderId">
+              and d.orderId = #{orderId,jdbcType=VARCHAR}
+          </if>
+          <if test="goodsCode != null and '' != goodsCode">
+              and d. = #{goodsCode}
+          </if>
+          <if test="time != null and '' != time">
+              and o.orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+          </if>
+          <if test="uid != null">
+              and o.uid = #{uid,jdbcType=BIGINT}
+          </if>
+          <if test="parentId != null">
+              and o.parentId = #{parentId,jdbcType=BIGINT}
+          </if>
+      </where>
+  </select>
+
+</mapper>

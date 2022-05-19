@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jquery-confirm.min.css">
+    <title>退货</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/jquery-confirm.min.js"></script>
+    <script src="js/bignumber.js"></script>
+</head>
+<body >
+<div class="nei_header"  style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+
+    <h3 style="color: red;">退款模式</h3>
+     <div class="rentu">
+         <img src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+     </div>
+</div>
+
+
+
+
+<!--选择商品弹出窗-->
+
+<div id="jieqing" class="popup ">
+    <div class="popupbox jieqing">
+        <div class="pop_title">
+            选择商品 <span class="fet_out"> </span>
+        </div>
+
+        <section>
+            <div class="sousuo">
+                <input class="dateinput" id="time" type="date">
+                <input class="textinput" id="orderId" type="text" placeholder="按条码/商品名搜索">
+                <button onclick="refund()">搜索</button>
+            </div>
+
+            <div class="main_box">
+                <div class="cont_box editpro_box">
+                    <!--财务报表-->
+                    <table border="0" cellspacing="0" cellpadding="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>选择</th>
+                            <th>订单号</th>
+                            <th>实付金额(元)</th>
+                            <th>折扣金额(元)</th>
+                            <th>商品详情</th>
+                        </tr>
+                        </thead>
+                        <tbody id="refundBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <div class="jie_btn">
+            <span class="pagespan" onclick="initTable(false)">上页</span>
+            <span class="pagespan" id="pageText">1/1</span>
+            <span class="pagespan" onclick="initTable(true)">下页</span>
+
+            <button class="sfg" style="float: right;  margin-left: 15px;" onclick="addGoogs()">加入</button>
+            <button class="fty" style="float: right;  width: 100px;" onclick="$('.popup').fadeOut();">取消</button>
+        </div>
+
+    </div>
+</div>
+<!--选择商品弹出窗-->
+
+
+<script type="application/javascript">
+    //弹框
+    function showpop(id) {
+        $(id).fadeIn();
+
+        var h = ($(window).height() - $(id).children('.popup-box').height()) / 2;
+        $(id).children('.popup-box').css('margin-top', h);
+    }
+
+    $('.fet_out').click(function () {
+        $('.popup').fadeOut();
+    });
+
+</script>
+
+
+<section style="padding-bottom: 200px; padding-top: 100px">
+    <div class="main_box">
+        <div class="cont_box editpro_box">
+            <!--财务报表-->
+            <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" readonly name="allBox"/></th>
+                    <th>商品条码</th>
+                    <th>商品名称</th>
+                    <th>原价(元)</th>
+                    <th>折扣(元)</th>
+                    <th>数量</th>
+                    <th>现价(元)</th>
+                    <th>小计(元)</th>
+                </tr>
+
+                </thead>
+                <tbody id="goodsBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+
+
+
+<footer class="footer">
+    <div class="zongji">
+        <ul>
+            <li><img src="images/yewuzongshu.png" alt=""> 共计商品 <span id="goodsNum">0</span>件</li>
+            <li>
+                <div class="btn_con" style="width: 40%;">
+                    <button onclick="refund()">订单查询</button>
+                    <button onclick="del()">删除</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="lst">
+        <ul>
+            <li>
+                <label> <input id="detailOrder" type="text" placeholder="订单号" onchange="query()"> <img src="images/jianpan.png" alt="" onclick="refund()"> </label>
+            </li>
+            <li class="mosh" style="background-color: #548e1d;" onclick="save()">
+                <div>
+                    <h4>退&nbsp;款</h4>
+                    <p>[空格键]</p>
+                </div>
+                <div class="moren">￥<span id="subtotalSum"></span></div>
+            </li>
+        </ul>
+    </div>
+</footer>
+</body>
+<script type="application/javascript">
+    var page = 0;
+    var total = 0;
+    var dataList = new Map();
+    var orderId = null;
+
+    function del() {
+        let goodsBox = $("input[name='goodsBox']:checked");
+        for (let i = 0, s = goodsBox.length; i < s; i++) {
+            let goodsCode = goodsBox[i].value;
+            $("#row" + goodsCode[i]).remove();
+            dataList.delete(goodsCode + "");
+        }
+    }
+
+    function addGoogs() {
+        let order = $('input[name="refundRadio"]').val();
+        if(order == null || order == undefined || order == ""){
+            $.message({
+                message: "请选择退款订单！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            let o = JSON.parse(order);
+            dataList = new Map();
+            orderId = o.orderId;
+            $("#goodsBody").html("");
+            initSum();
+            $("#detailOrder").val(o.orderId);
+            $('.popup').fadeOut();
+            $("#refundBody").html("");
+            query();
+        }
+    }
+
+    function query() {
+        let orderId = $("#detailOrder").val();
+        if (orderId == "" && orderId == "") {
+            $.message({
+                message: "请输入订单号",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            cashierPost("detail/order.do", {orderId: orderId}, detailFunction);
+        }
+    }
+
+    function detailFunction(result) {
+        let tableHtml = "";
+        for (let order of result) {
+            tableHtml +=
+                "<tr id='row" + order.goodsCode + "'>" +
+                "<td><input type='checkbox' name='goodsBox' value='" + order.goodsCode + "' /></td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.goodsCode + "</td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.goodsName + "</td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.costPrice + "</td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.discount + "</td>" +
+                "<td><input type='text' onchange='resetGoods(\"" + order.goodsCode + "\",this)' value='" + (order.num == null ? 0 : order.num) + "'/></td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.currentPrice + "</td>" +
+                "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.subtotal + "</td>" +
+                "</tr>";
+            dataList.set(order.goodsCode + "", order);
+        }
+        $("#goodsBody").html(tableHtml);
+        initSum();
+    }
+
+    function resetGoods(goodsCode, input) {
+        let order = dataList.get(goodsCode + "");
+
+        if(parseInt(input.value) > order.num){
+            $.message({
+                message: order.goodsName + "退货数量超出购买数量！",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            input.value = order.num;
+            return;
+        }
+        order.num = parseInt(input.value);
+        if (order.type == 1) {
+            order.subtotal = new BigNumber(order.costPrice).minus(order.discount).times(order.num) - 0;
+        } else {
+            order.subtotal = new BigNumber(order.costPrice).minus(order.discount).times(order.num) - 0;
+        }
+        let td = $("#row" + goodsCode).find("td")[7];
+        $(td).text(order.subtotal);
+        initSum();
+    }
+
+    function initSum() {
+        let goodsNum = 0;
+        let subtotalSum = 0;
+
+        dataList.forEach(function (value, key) {
+            goodsNum += (value.num == null ? 0 : parseInt(value.num));
+            subtotalSum = new BigNumber(subtotalSum).plus(value.subtotal == null ? 0 : parseFloat(value.subtotal)) - 0;
+        });
+        $("#goodsNum").text(goodsNum);
+        $("#subtotalSum").text(subtotalSum);
+    }
+
+    function selection(goodsCode) {
+        let td = $("#row" + goodsCode).find("td")[0];
+        if ($(td).find("input").is(':checked')) {
+            $(td).find("input").prop("checked", false);
+        } else {
+            $(td).find("input").prop("checked", true);
+        }
+    }
+
+
+    function initTable(b) {
+        if (b) {
+            if (total == 0 && page > 0) {
+                $.message({
+                    message: "无数据",    //提示信息
+                    duration: 3000,
+                    type: 'info',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            } else if (total != 0 && total == page) {
+                $.message({
+                    message: "已是末页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page++;
+        } else {
+            if (page == 1) {
+                $.message({
+                    message: "已是首页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page--;
+        }
+        let time = $("#time").val();
+        let sTime = null;
+        let eTime = null;
+        if(time != undefined && time != null && time != ""){
+            sTime = time + "T00:00:00";
+            eTime = time + "T23:59:59";
+        }
+        let orderId = $("#orderId").val();
+        cashierPost("order/list.do", {orderId: orderId, sTime: sTime,eTime: eTime, status: 1, pageNo: page, pageSize: 10}, refundFunction);
+    }
+
+
+    function refund() {
+        page = 1;
+        total = 0;
+        let time = $("#time").val();
+        let sTime = null;
+        let eTime = null;
+        if(time != undefined && time != null && time != ""){
+            sTime = time + "T00:00:00";
+            eTime = time + "T23:59:59";
+        }
+        let orderId = $("#orderId").val();
+        cashierPost("order/list.do", {orderId: orderId, sTime: sTime,eTime: eTime, status: 1, pageNo: page, pageSize: 10}, refundFunction);
+        showpop("#jieqing");
+    }
+    function refundFunction(result) {
+        let tableHtml = "";
+        if (result.list == null || result.list.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            for (let order of result.list) {
+                tableHtml +=
+                    "<tr>" +
+                    "<td><input type='radio' name='refundRadio' value='" + JSON.stringify(order) + "' /></td>" +
+                    "<td>" + order.orderId + "</td>" +
+                    "<td>" + order.actualPay + "</td>" +
+                    "<td>" + order.fictitious + "</td>" +
+                    "<td>" + (order.unfinished != null ? order.unfinished : "") + "</td>" +
+                    "</tr>";
+            }
+        }
+        $("#refundBody").html(tableHtml);
+        total = result.pages;
+        $("#pageText").text(page + "/" + total);
+    }
+
+    function save() {
+        if (dataList.size <= 0) {
+            $.message({
+                message: "请添加商品！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        }
+        let list = [];
+        let i = 0;
+        for (let key of dataList) {
+            let value = key[1]
+            if (value.num == undefined || value.num == null || value.num == 0) {
+                $.message({
+                    message: key[0] + "请输入购买数量！",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            list[i] = value;
+            i++;
+        }
+        let order = {
+            orderId: orderId,
+            list: list
+        }
+        $.confirm({
+            title: '商品退款',
+            content: "商品退款后是否入库存么？",
+            boxWidth: '40%',
+            buttons: {
+                ok: {
+                    text: "是",
+                    action: function () {
+                        cashierPost("order/refund.do", {order: JSON.stringify(order),type: 1}, saveFunction);
+                    }
+                },
+                not: {
+                    text: "否",
+                    action: function () {
+                        cashierPost("order/refund.do", {order: JSON.stringify(order),type: 0}, saveFunction);
+                    }
+                },
+                cancel: {
+                    text: "取消"
+                }
+            }
+        })
+
+    }
+
+    function saveFunction(result) {
+        if (result) {
+            $.message({
+                message: "退款成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            page = 0;
+            total = 0;
+            dataList = new Map();
+            orderId = null;
+            $("#goodsBody").html("");
+            initSum();
+        } else {
+            $.message({
+                message: "退款失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    $(function () {
+        $(document).keydown(function (event) {
+            if (event.keyCode == 32) {
+                save();
+            }
+        });
+    });
+</script>
+</html>

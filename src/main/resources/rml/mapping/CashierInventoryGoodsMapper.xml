@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierInventoryGoodsMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_inventory_goods
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="delInventoryDay" parameterType="rml.model.CashierInventoryGoods" >
+    delete from cashier_inventory_day
+    where inventoryTime = #{time,jdbcType=VARCHAR}
+    <if test="goodsCode != null and '' != goodsCode">
+      and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+    </if>
+    <if test="parentId != null">
+      and parentId = #{parentId,jdbcType=BIGINT}
+    </if>
+  </delete>
+  <select id="selectDateMax" parameterType="rml.model.CashierInventoryGoods" resultType="java.util.Date">
+    select max(inventoryTime) inventoryTime from cashier_inventory
+    <where>
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+
+  <update id="insertInventoryDay" parameterType="rml.model.CashierInventoryGoods">
+      INSERT INTO cashier_inventory_day (inventoryTime,goodsCode,goodsName,purchasePrice,afterInventory,beforeInventory,createTime,parentId,inInventory)
+      SELECT
+        now(),g.goodsCode, g.goodsName, g.purchasePrice, g.inventory AS afterInventory,
+        CASE WHEN x.afterInventory IS NULL THEN g.inventory ELSE x.afterInventory END AS beforeInventory,
+        now(),g.parentId,IFNULL(ing.inInventory,0)
+      FROM
+      cashier_goods g
+      LEFT JOIN (
+        SELECT
+          ig.afterInventory, ig.goodsCode
+        FROM
+          cashier_inventory i
+        INNER JOIN cashier_inventory_goods ig ON i.inventoryNo = ig.inventoryNo
+        WHERE
+          i.inventoryTime = #{sTime} AND i.parentId = #{parentId,jdbcType=BIGINT}
+      ) x ON g.goodsCode = x.goodsCode
+      LEFT JOIN (
+      SELECT goodsCode, SUM(inventory) AS inInventory FROM
+      cashier_in_goods
+      WHERE
+      createTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND `status` = 1
+      AND parentId = #{parentId,jdbcType=BIGINT}
+      GROUP BY goodsCode
+      ) ing ON ing.goodsCode = g.goodsCode
+    <where>
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode  = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </update>
+  <update id="updateInventoryDay" parameterType="rml.model.CashierInventoryGoods">
+    UPDATE cashier_inventory_day g
+    LEFT JOIN (
+      SELECT
+        SUM(og.num) payNum, og.goodsCode
+      FROM
+        cashier_order o
+      INNER JOIN cashier_order_goods og ON o.orderId = og.orderId
+      WHERE
+        o.orderTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND o.`status` = 1
+        AND o.parentId = #{parentId,jdbcType=BIGINT}
+    ) p ON g.goodsCode = p.goodsCode
+    LEFT JOIN (
+      SELECT goodsCode, SUM(reportLoss) reportLoss FROM
+      cashier_loss_goods
+      WHERE
+        createTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND `type` = 1
+        AND parentId = #{parentId,jdbcType=BIGINT}
+      GROUP BY goodsCode
+    ) lg ON lg.goodsCode = g.goodsCode
+    SET g.payNum = IFNULL(p.payNum,0),g.reportLoss = IFNULL(lg.reportLoss,0)
+    <where>
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </update>
+
+  <insert id="insert" parameterType="rml.model.CashierInventoryGoods" >
+    insert into cashier_inventory_goods (inventoryNo, goodsName,
+      goodsCode, purchasePrice, `type`,
+      beforeInventory, afterInventory, difference, createTime)
+    values (#{inventoryNo,jdbcType=VARCHAR}, #{goodsName,jdbcType=VARCHAR},
+      #{goodsCode,jdbcType=VARCHAR}, #{purchasePrice,jdbcType=DECIMAL}, #{type,jdbcType=INTEGER},
+      #{beforeInventory,jdbcType=INTEGER}, #{afterInventory,jdbcType=INTEGER}, #{difference,jdbcType=INTEGER},
+      #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierInventoryGoods" >
+    update cashier_inventory_goods
+    set inventoryNo = #{inventoryNo,jdbcType=VARCHAR},
+      goodsName = #{goodsName,jdbcType=VARCHAR},
+      goodsCode = #{goodsCode,jdbcType=VARCHAR},
+      purchasePrice = #{purchasePrice,jdbcType=DECIMAL},
+      `type` = #{type,jdbcType=INTEGER},
+      beforeInventory = #{beforeInventory,jdbcType=INTEGER},
+      afterInventory = #{afterInventory,jdbcType=INTEGER},
+      difference = #{difference,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    select id, inventoryNo, goodsName, goodsCode, purchasePrice, `type`, beforeInventory,
+    afterInventory, difference, createTime
+    from cashier_inventory_goods
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="inventoryNo != null and '' != inventoryNo">
+        and inventoryNo = #{inventoryNo,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    select id, inventoryNo, goodsName, goodsCode, purchasePrice, `type`, beforeInventory,
+    afterInventory, difference, createTime
+    from cashier_inventory_goods
+    <where>
+      <if test="inventoryNo != null and '' != inventoryNo">
+        and inventoryNo = #{inventoryNo,jdbcType=VARCHAR}
+      </if>
+      <if test="goodsCode != null and '' != goodsCode">
+        and goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <select id="selectCheckCopy" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    SELECT
+      g.goodsCode, g.goodsName, g.purchasePrice, g.inventory AS afterInventory,
+      CASE WHEN x.afterInventory IS NULL THEN g.inventory ELSE x.afterInventory END AS beforeInventory,
+      (IFNULL(x.afterInventory, 0) + IFNULL(ing.inInventory, 0) - IFNULL(lg.reportLoss, 0) - IFNULL(p.payNum,0) - g.inventory) AS difference
+    FROM
+    cashier_goods g
+    LEFT JOIN (
+      SELECT
+        ig.afterInventory, ig.goodsCode
+      FROM
+        cashier_inventory i
+      INNER JOIN cashier_inventory_goods ig ON i.inventoryNo = ig.inventoryNo
+      WHERE
+        i.inventoryTime = DATE_SUB(#{time}, INTERVAL 1 DAY) AND i.parentId = #{parentId,jdbcType=BIGINT}
+    ) x ON g.goodsCode = x.goodsCode
+    LEFT JOIN (
+    SELECT goodsCode, SUM(inventory) AS inInventory FROM
+    cashier_in_goods
+    WHERE
+    createTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND `status` = 1
+    AND parentId = #{parentId,jdbcType=BIGINT}
+    GROUP BY goodsCode
+    ) ing ON ing.goodsCode = g.goodsCode
+    LEFT JOIN (
+      SELECT
+        SUM(og.num) payNum, og.goodsCode
+      FROM
+        cashier_order o
+      INNER JOIN cashier_order_goods og ON o.orderId = og.orderId
+      WHERE
+        o.orderTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND o.`status` = 1
+        AND o.parentId = #{parentId,jdbcType=BIGINT}
+    ) p ON g.goodsCode = p.goodsCode
+    LEFT JOIN (
+      SELECT goodsCode, SUM(reportLoss) reportLoss FROM
+      cashier_loss_goods
+      WHERE
+        createTime BETWEEN CONCAT(#{time},' 00:00:00') AND CONCAT(#{time},' 23:59:59') AND `type` = 1
+        AND parentId = #{parentId,jdbcType=BIGINT}
+      GROUP BY goodsCode
+    ) lg ON lg.goodsCode = g.goodsCode
+    <where>
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <select id="selectCheck" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    SELECT
+    g.goodsCode, g.goodsName, g.purchasePrice, g.afterInventory,g.beforeInventory,
+    (g.beforeInventory + g.inInventory - g.reportLoss - g.payNum - g.afterInventory) AS difference
+    FROM
+    cashier_inventory_day g
+    <where>
+      inventoryTime = #{time,jdbcType=VARCHAR} AND parentId = #{parentId,jdbcType=BIGINT}
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+    LIMIT 17
+  </select>
+  <select id="selectSum" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    SELECT
+      SUM(g.purchasePrice) purchasePrice, SUM(g.afterInventory) afterInventory,SUM(g.beforeInventory) beforeInventory,
+      SUM(g.beforeInventory + g.inInventory - g.reportLoss - g.payNum - g.afterInventory) AS difference
+    FROM
+    cashier_inventory_day g
+    where
+      inventoryTime = #{time,jdbcType=VARCHAR} AND parentId = #{parentId,jdbcType=BIGINT}
+  </select>
+  <select id="selectDay" resultType="rml.model.CashierInventoryGoods" parameterType="rml.model.CashierInventoryGoods">
+    SELECT
+    g.goodsCode, g.goodsName, g.purchasePrice, g.afterInventory,g.beforeInventory,
+    (g.beforeInventory + g.inInventory - g.reportLoss - g.payNum - g.afterInventory) AS difference
+    FROM
+    cashier_inventory_day g
+    <where>
+      inventoryTime = #{time,jdbcType=VARCHAR} AND parentId = #{parentId,jdbcType=BIGINT}
+      <if test="goodsCode != null and '' != goodsCode">
+        and g.goodsCode = #{goodsCode,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <update id="insertList" parameterType="rml.model.CashierInventory">
+    INSERT INTO cashier_inventory_goods (inventoryNo, goodsName, goodsCode, purchasePrice, `type`, beforeInventory, afterInventory, difference, createTime)
+    SELECT
+      #{inventoryNo,jdbcType=VARCHAR}, g.goodsName, g.goodsCode, g.purchasePrice, 1, g.beforeInventory, g.afterInventory,
+      (g.beforeInventory + g.inInventory - g.reportLoss - g.payNum - g.afterInventory) AS difference, NOW()
+    FROM
+      cashier_inventory_day g
+    WHERE
+      inventoryTime = #{inventoryTime,jdbcType=DATE} AND parentId = #{parentId,jdbcType=BIGINT}
+  </update>
+  <update id="update" parameterType="rml.model.CashierInventoryGoods">
+    UPDATE cashier_inventory_goods SET afterInventory = #{afterInventory,jdbcType=INTEGER}
+    WHERE
+      inventoryNo = #{inventoryNo,jdbcType=VARCHAR} AND goodsCode = #{goodsCode,jdbcType=VARCHAR}
+  </update>
+</mapper>

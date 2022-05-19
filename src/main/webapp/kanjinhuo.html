@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>历史商品进货</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+</head>
+<body>
+<div class="nei_header" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+
+    <h3>历史商品进货</h3>
+    <div class="rentu">
+        <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+    </div>
+    <div class="jix">
+        <a href="jinhuo.html">商品入库>></a>
+    </div>
+</div>
+
+<section style="padding-bottom: 200px; padding-top: 100px">
+    <div class="main_box">
+        <div class="cont_box editpro_box">
+            <!--财务报表-->
+            <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                <thead>
+                    <tr>
+                        <th>批次号</th>
+                        <th>商品条码</th>
+                        <th>商品名称</th>
+                        <th>进货价(元)</th>
+                        <th>销售价(元)</th>
+                        <th>供货商</th>
+                        <th>进货数量</th>
+                        <th>入库状态</th>
+                        <th>入库人</th>
+                        <th>时间</th>
+                    </tr>
+                </thead>
+                <tbody id="goodsBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+
+<footer class="footer">
+
+    <div class="lst">
+        <ul>
+            <li>
+                <div class="saoma">
+                    <label> <input id="goods" type="text" placeholder="条形码/名称"> <span>扫码模式</span> </label>
+                </div>
+            </li>
+            <li>
+                <div style="width: 400px;border: none;margin-top: 10px">
+                    时间：<input id="sTime" type="datetime-local">-<input id="eTime" type="datetime-local">
+                </div>
+                <div style="border: none;margin-top: 10px">
+                    批次号：<input id="batch" type="text" placeholder="批次号">
+                </div>
+                <div style="border: none;margin-top: 10px">
+                    状态：
+                    <select id="status" style="width:167px;height: 25px;">
+                        <option value="">请选择</option>
+                        <option value="1">已入库</option>
+                        <option value="0">未入库</option>
+                    </select>
+                </div>
+            </li>
+            <li class="right_mo">
+                <div class="right_2" style="float: right; ">
+                    <button style="background-color: #ff5555;" onclick="query()">查询</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+</body>
+<script type="application/javascript">
+    function query() {
+        let goods = $("#goods").val();
+        let sTime = $("#sTime").val();
+        let eTime = $("#eTime").val();
+        let batch = $("#batch").val();
+        let status = $("#status").val();
+        if (goods == "" && sTime == "" && eTime == "" && batch == "") {
+            $.message({
+                message: "至少输入1个条件",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            cashierPost("ingoods/list.do", {goodsName: goods, sTime: sTime, eTime: eTime, batch: batch, status: status}, someFunction);
+        }
+    }
+    function someFunction(result) {
+        let tableHtml = "";
+        if (result == null || result.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            for (let m of result) {
+                tableHtml +=
+                    "<tr>" +
+                    "<td>" + m.batch + "</td>" +
+                    "<td>" + m.goodsCode + "</td>" +
+                    "<td>" + m.goodsName + "</td>" +
+                    "<td>" + m.purchasePrice + "</td>" +
+                    "<td>" + m.salesPrice + "</td>" +
+                    "<td>" + (m.supplier == 1 ? "老李水果店" : m.supplier == 2 ? "老王肉铺店" : m.supplier == 3 ?"老张五金店" :m.supplier == 4? "老马百货批发店" :"") + "</td>" +
+                    "<td>" + m.inventory + "</td>" +
+                    "<td>" + (m.status == 1 ? "已入库" : "未入库") + "</td>" +
+                    "<td>" + m.uname + "</td>" +
+                    "<td>" + crtTimeFtt(m.createTime) + "</td>" +
+                    "</tr>";
+            }
+        }
+        $("#goodsBody").html(tableHtml);
+    }
+    function crtTimeFtt(value){
+        let crtTime = new Date(value);
+        return dateFtt("yyyy-MM-dd hh:mm:ss",crtTime);//直接调用公共JS里面的时间类处理的办法
+    }
+</script>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/diyUpload.css">
+    <link rel="stylesheet" href="css/webuploader.css">
+    <title>系统设置</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+</head>
+<body>
+<div class="nei_header">
+    <h3>系统设置</h3>
+    <div class="rentu">
+        <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+    </div>
+    <i class="moix" onclick="location.href='tab.html'">菜单</i>
+</div>
+
+
+<div class="danju_con">
+
+    <div class="danju_left shezhi_left">
+        <div class="dan_title" style="text-align: center; font-size: 18px;">
+            系统设置
+        </div>
+
+        <div class="danju_lis shezhi">
+            <ul>
+                <li onclick="location.href='xitongshezhi.html'"> 通用设置</li>
+                <li onclick="location.href='zhifushezhi.html'"> 订单设置</li>
+                <li class="on"> 账号管理</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!--&lt;!&ndash;订单设置开始&ndash;&gt;-->
+
+    <div class="shezhi_con">
+        <div class="lst">
+            <table style="position: absolute; left: 21%; top: 80px; width: 78%; height: 40px; overflow-y: auto;">
+                <tr>
+                    <td width="25%">
+
+                    </td>
+                    <td width="25%">
+                        类型：
+                        <select id="type" style="width:167px;height: 25px;border: 1px solid #00b8c9;">
+                            <option value="">请选择</option>
+                            <option value="1">超级管理员</option>
+                            <option value="2">店长</option>
+                            <option value="3">员工</option>
+                        </select>
+                    </td>
+                    <td width="25%">
+                        账号：<input style="height: 25px;border: 1px solid #00b8c9;" id="account" type="text"
+                                  placeholder="账号"/>
+                    </td>
+                    <td align="right">
+                        <div class="duihcu">
+                            <button style="background-color: #27ae60;" onclick="showpop('#bakdate')">创建</button>
+                        </div>
+                    </td>
+                    <td align="right">
+                        <div class="duihcu">
+                            <button style="background-color: #ff5555;" onclick="query()">查询</button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <section style="position: absolute; left: 21%; top: 160px; width: 78%; height: 610px; overflow-y: auto;">
+            <div class="main_box">
+                <div class="cont_box editpro_box">
+                    <!--财务报表-->
+                    <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                        <thead>
+                        <tr>
+                            <th>类型</th>
+                            <th>账号</th>
+                            <th>登陆时间</th>
+                            <th>创建时间</th>
+                        </tr>
+
+                        </thead>
+                        <tbody id="payBody">
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+        <!--底部-->
+
+        <div class="mifooter">
+            <div class="page">
+                <span onclick="initTable(false)">上页</span>
+                <span id="pageText">1/1</span>
+                <span onclick="initTable(true)">下页</span>
+            </div>
+        </div>
+
+        <!--底部-->
+    </div>
+
+</div>
+<!--编辑弹窗-->
+<div id="bakdate" class="popup">
+    <div class="mo_date" style="width: 700px; top: 45%; ">
+        <div class="mo_title">添加账户 <span class="fet_out" style="cursor: pointer">×</span></div>
+        <div class="bianjikuang">
+            <ul>
+                <li>
+                    账号：
+                    <input type="text" id="sAccount" style="width:167px;height: 30px;border: 1px solid #00b8c9;">
+                    <p style="color: red" id="accountTab"></p>
+                </li>
+                <li>
+                    密码：
+                    <input type="password" id="sPassword" style="width:167px;height: 30px;border: 1px solid #00b8c9;">
+                    <p style="color: red" id="passwordTab"></p>
+                </li>
+                <li>
+                    类型：
+                    <select id="sType" style="width:167px;height: 30px;border: 1px solid #00b8c9;">
+                        <option value="">请选择</option>
+                        <option value="2">店长</option>
+                        <option value="3">员工</option>
+                    </select>
+                    <p style="color: red" id="typeTab"></p>
+                </li>
+                <li>
+                    <p style="color: red"></p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="mo_btn">
+            <button style="background-color: #0099cb;" onclick="save()">确认</button>
+            <button style="background-color: #0099cb;" onclick="$('.popup').fadeOut()">取消</button>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+<script type="application/javascript">
+    var page = 0;
+    var total = 0;
+
+    function save() {
+
+        let account = $("#sAccount").val();
+        if (account == null || account == '') {
+            $("#accountTab").text("请输入账号！");
+            return;
+        } else {
+            $("#accountTab").text("");
+        }
+        let password = $("#sPassword").val();
+        if (password == null || password == '') {
+            $("#passwordTab").text("请输入密码！");
+            return;
+        } else {
+            $("#passwordTab").text("");
+        }
+        let type = $("#sType").val();
+        if (type == null || type == '') {
+            $("#typeTab").text("请选择类型！");
+            return;
+        } else {
+            $("#typeTab").text("");
+        }
+        cashierPost("user/add.do", {
+            type: type,
+            account: account,
+            password: password
+        }, saveFunction);
+    }
+
+    function saveFunction(result) {
+        if (result) {
+            $.message({
+                message: "保存成功",    //提示信息
+                duration: 5000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            $('.popup').fadeOut();
+            query();
+        } else {
+            $.message({
+                message: "保存失败",    //提示信息
+                duration: 5000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function query() {
+        page = 0;
+        total = 0;
+        initTable(true);
+    }
+
+    function initTable(b) {
+        if (b) {
+            if (total == 0 && page > 0) {
+                $.message({
+                    message: "无数据",    //提示信息
+                    duration: 3000,
+                    type: 'info',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            } else if (total != 0 && total == page) {
+                $.message({
+                    message: "已是末页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page++;
+        } else {
+            if (page == 1) {
+                $.message({
+                    message: "已是首页",    //提示信息
+                    duration: 3000,
+                    type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            page--;
+        }
+        let type = $("#type").val();
+        let account = $("#account").val();
+        cashierPost("user/list.do", {
+            type: type,
+            account: account,
+            pageNo: page,
+            pageSize: 10
+        }, someFunction);
+    }
+
+    function someFunction(result) {
+        let tableHtml = "";
+        if (result.list == null || result.list.length <= 0) {
+            $.message({
+                message: "无数据",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            for (let m of result.list) {
+                tableHtml +=
+                    "<tr>" +
+                    "<td>" + getType(m.type) + "</td>" +
+                    "<td>" + m.account + "</td>" +
+                    "<td>" + dateFtt("yyyy-MM-dd hh:mm:ss", new Date(m.loginTime)) + "</td>" +
+                    "<td>" + dateFtt("yyyy-MM-dd hh:mm:ss", new Date(m.createTime)) + "</td>" +
+                    "</tr>";
+            }
+        }
+        $("#payBody").html(tableHtml);
+        total = result.pages;
+        $("#pageText").text(page + "/" + total);
+    }
+
+    function getType(type) {
+        let t = '';
+        switch (type) {
+            case 1:
+                t = '超级管理员';
+                break;
+            case 2:
+                t = '店长';
+                break;
+            case 3:
+                t = '员工';
+                break;
+        }
+        return t;
+    }
+
+    //弹框
+    function showpop(id) {
+        $(id).fadeIn();
+
+        var h = ($(window).height() - $(id).children('.popup-box').height()) / 2;
+        $(id).children('.popup-box').css('margin-top', h);
+    }
+
+    $('.fet_out').click(function () {
+        $('.popup').fadeOut();
+    });
+</script>
+</html>

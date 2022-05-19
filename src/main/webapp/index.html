@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>零售</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/bignumber.js"></script>
+</head>
+<body>
+<header>
+    <div class="logo"><img src="images/shouyin.png" alt=""></div>
+    <div class="con_list">
+        <ul>
+            <li onclick="pending()">
+                <img src="images/baocun.png" alt="">
+                <p>保存待结</p>
+            </li>
+            <li onclick="unfinished()">
+                <img src="images/xiaoshoudanju.png" alt="">
+                <p>当日未结</p>
+            </li>
+<!--            <li onClick="showpop('#bankcard');">-->
+<!--                <img src="images/bangzhu.png" alt="">-->
+<!--                <p>通知</p>-->
+<!--            </li>-->
+<!--            <li onclick="location.href='xitongshezhi.html'">-->
+<!--                <img src="images/xitongshezhi.png" alt="">-->
+<!--                <p>系统设置</p>-->
+<!--            </li>-->
+            <li onclick="location.href='tab.html'">
+                <img src="images/gongnengguanli.png" alt="">
+                <p>菜单</p>
+            </li>
+        </ul>
+    </div>
+    <div class="mingc">
+        <span id="account"></span>
+        <p style="margin-top: 15px;color: #fff;cursor:pointer;" onclick="location.href='home.html'">退出</p>
+    </div>
+</header>
+
+
+<!--通知弹出框-->
+<div id="bankcard" class="popup">
+    <div class="popupbox">
+        <div class="pop_title">
+            通知中心 <span class="fet_out"> </span>
+        </div>
+        <div class="left_to">
+            <ul>
+                <li><img src="images/s_1_03.jpg" alt=""> 生日提醒 <i>0</i></li>
+                <li><img src="images/s_2_03.jpg" alt="">保质期预警 <i>0</i></li>
+                <li><img src="images/S_3_03.jpg" alt="">周期消费提醒 <i>0</i></li>
+                <li><img src="images/s_4_03.jpg" alt="">库存预警 <i>0</i></li>
+                <li><img src="images/s_1_03.jpg" alt="">商品调价通知 <i>0</i></li>
+                <li><img src="images/s_1_03.jpg" alt="">货流通知 <i>0</i></li>
+            </ul>
+        </div>
+
+        <div class="right_to">
+            <div><span>商品</span><span>售价</span><span>新售价</span><span>生效日期</span></div>
+        </div>
+
+    </div>
+</div>
+
+<!--通知弹出框-->
+
+
+<!--洁清弹出框-->
+
+<div id="jieqing" class="popup ">
+    <div class="popupbox jieqing">
+        <div class="pop_title">
+            未结订单 <span class="fet_out"> </span>
+        </div>
+
+
+        <section>
+            <div class="main_box">
+                <div class="cont_box editpro_box">
+                    <!--财务报表-->
+                    <table border="0" cellspacing="0" cellpadding="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>选择</th>
+                            <th>订单号</th>
+                            <th>金额(元)</th>
+                            <th>商品详情</th>
+                        </tr>
+                        </thead>
+                        <tbody id="unfinishedBody">
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </section>
+
+
+        <div class="jie_btn">
+            <button class="rec" onclick="recovery()">恢复</button>
+            <button class="sfg" onclick="unfinished()">确认</button>
+            <input type="text" id="orderId" placeholder="订单号">
+        </div>
+
+    </div>
+</div>
+
+<!--洁清弹出框-->
+
+
+<!--选择商品弹出窗-->
+
+<div id="xuans" class="popup ">
+    <div class="popupbox jieqing">
+        <div class="pop_title">
+            选择商品 <span class="fet_out"> </span>
+        </div>
+
+        <section>
+            <div class="sousuo">
+                <input id="seach" type="text" placeholder="按条码/商品名搜索">
+                <button onclick="seach()">搜索</button>
+            </div>
+
+            <div class="main_box">
+                <div class="cont_box editpro_box" style="overflow:scroll; width:100%; height:340px">
+                    <!--财务报表-->
+                    <table border="0" cellspacing="0" cellpadding="0" class="table">
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" name="allxBox" onclick="checkBoxAll(this)"/></th>
+                            <th>商品条码</th>
+                            <th>商品名称</th>
+                            <th>优惠金额</th>
+                            <th>原价(元)</th>
+                            <th>库存</th>
+                        </tr>
+                        </thead>
+                        <tbody id="goodsXuans">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <div class="jie_btn">
+            <span id="matching">找到0件匹配商品</span>
+
+            <button class="sfg" style="float: right;  margin-left: 15px;" onclick="addGoogs()">加入</button>
+            <button class="fty" style="float: right;  width: 100px;" onclick="$('.popup').fadeOut();">取消</button>
+
+
+        </div>
+
+    </div>
+</div>
+<!--选择商品弹出窗-->
+
+
+<script type="application/javascript">
+    //弹框
+    function showpop(id) {
+        $(id).fadeIn();
+
+        var h = ($(window).height() - $(id).children('.popup-box').height()) / 2;
+        $(id).children('.popup-box').css('margin-top', h);
+    }
+
+    $('.fet_out').click(function () {
+        $('.popup').fadeOut();
+    });
+
+</script>
+
+
+<section style="padding-bottom: 200px; padding-top: 75px">
+    <div class="main_box">
+        <div class="cont_box editpro_box">
+            <!--财务报表-->
+            <table border="0" cellspacing="0" cellpadding="0" class="table">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" checked name="allBox" onclick="checkAll(this)"/></th>
+                    <th>商品条码</th>
+                    <th>商品名称</th>
+                    <th>原价(元)</th>
+                    <th>优惠金额</th>
+                    <th>数量</th>
+                    <th>现价(元)</th>
+                    <th>小计(元)</th>
+                </tr>
+
+
+                </thead>
+                <tbody id="goodsBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="zongji">
+        <ul>
+            <li><img src="images/yewuzongshu.png" alt=""> 共计商品 <span id="goodsNum">0</span>件</li>
+            <li>
+                <div class="btn_con">
+                    <button onclick="clean()">清空</button>
+                    <button onclick="del()">删除</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="lst">
+        <ul>
+            <li>
+                <label>
+                    <input id="goods" type="text" placeholder="条码/商品名" onkeypress="return onKeyPress(event)">
+                    <img src="images/jianpan.png" alt="" onClick="showpop('#xuans');">
+                </label>
+                <label>
+                    <input id="code" type="text" placeholder="自定码" onkeypress="return onKeyPress(event)">
+                    <img src="images/jianpan.png" alt="" onClick="showpop('#xuans');">
+                </label>
+            </li>
+<!--            <li>-->
+<!--                <label> <input type="text" placeholder="电话号"> <img src="images/jianpan.png" alt=""> </label>-->
+<!--                <div class="cz">-->
+<!--                    <ol>-->
+<!--                        <li>-->
+<!--                            <p>来宾</p>-->
+<!--                            <div>姓名 <a href="">查看</a></div>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <p>0</p>-->
+<!--                            <div>余额<a href="">充值</a></div>-->
+<!--                        </li>-->
+<!--                        <li>-->
+<!--                            <p>0</p>-->
+<!--                            <div>积分 <a href="">兑换</a></div>-->
+<!--                        </li>-->
+<!--                    </ol>-->
+<!--                </div>-->
+<!--            </li>-->
+            <li class="mosh" onclick="save()">
+                <div>
+                    <h4>收&nbsp;款</h4>
+                    <p>[空格键]</p>
+                </div>
+                <div class="moren">￥<span id="subtotalSum"></span></div>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+</body>
+<script type="application/javascript">
+    var dataList = new Map();
+    var orderId = null;
+    var fictitious = 0;
+    let data = window.sessionStorage.getItem("account");
+    let user = JSON.parse(data);
+
+    function checkBoxAll(obj) {
+        $('input[name="xuansBox"]').each(function (index) {
+            this.checked = obj.checked;
+        });
+    }
+
+
+    function checkAll(obj) {
+        $('input[name="goodsBox"]').each(function (index) {
+            this.checked = obj.checked;
+        });
+    }
+
+    function recovery() {
+
+        let order = $('input[name="unfinishedRadio"]:checked').val();
+        if(order == null || order == undefined || order == ""){
+            $.message({
+                message: "请选择订单恢复！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            let o = JSON.parse(order);
+            orderId = o.orderEdsc;
+            fictitious = o.fictitious;
+            dataList = new Map();
+            $("#goodsBody").html("");
+            initSum();
+            cashierPost("detail/list.do", {orderId: orderId}, someFunction);
+            $('.popup').fadeOut();
+        }
+    }
+
+    function unfinished() {
+        let orderId = $("#orderId").val();
+        cashierPost("order/query.do",{orderId: orderId} ,unfinishedFunction);
+    }
+    function unfinishedFunction(result) {
+        let tableHtml = "";
+        for (let order of result) {
+            tableHtml +=
+                "<tr>" +
+                "<td><input type='radio' name='unfinishedRadio' value='" + JSON.stringify(order) + "' /></td>" +
+                "<td>" + order.orderId + "</td>" +
+                "<td>" + order.amount + "</td>" +
+                "<td>" + (order.unfinished != null ? order.unfinished : "") + "</td>" +
+                "</tr>";
+        }
+        $("#unfinishedBody").html(tableHtml);
+        showpop('#jieqing');
+    }
+    function pending() {
+        if (dataList.size <= 0) {
+            $.message({
+                message: "请购买商品！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return
+        }
+        let list = []
+        let i = 0;
+        for (let key of dataList) {
+            let value = key[1]
+            if (value.num == undefined || value.num == null || value.num == 0) {
+                $.message({
+                    message: key[0] + "请输入购买数量！",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            list[i] = value;
+            i++;
+        }
+        let order = {
+            orderId: orderId,
+            fictitious: fictitious,
+            singleNum: dataList.size,
+            status: 0,
+            unfinished: "1",
+            list: list
+        }
+        if (orderId == null) {
+            cashierPost("order/add.do", {order: JSON.stringify(order)}, pendingFunction);
+        } else {
+            cashierPost("order/update.do", {order: JSON.stringify(order)}, pendingFunction);
+        }
+    }
+
+    function pendingFunction(result) {
+        if (result) {
+            dataList = new Map();
+            orderId = null;
+            fictitious = 0;
+            $("#goodsBody").html("");
+            initSum();
+            $.message({
+                message: "待结保存成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            $.message({
+                message: "待结保存失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+
+
+
+    function addGoogs() {
+        let xuansBox = $("input[name='xuansBox']:checked");
+        if (xuansBox.length > 0) {
+            let goodsCode = "";
+            for (let i = 0, s = xuansBox.length; i < s; i++) {
+                goodsCode += ("," + xuansBox[i].value);
+            }
+            cashierPost("goods/orders.do", {goodsCode: goodsCode.substring(1)}, someFunction);
+            $('.popup').fadeOut();
+        } else {
+            $.message({
+                message: "请选择商品！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function seach() {
+        let goods = $("#seach").val();
+        if (goods == undefined || goods == '' || goods == null) {
+            $.message({
+                message: "请输入搜索内容！",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        }
+        cashierPost("goods/all.do", {goodsName: goods, obtain: 1}, goodsFunction);
+    }
+
+    function goodsFunction(result) {
+
+        let tableHtml = "";
+        for (let order of result) {
+            tableHtml +=
+                "<tr id='gRow"+ order.goodsCode +"'>" +
+                "<td><input type='checkbox' checked name='xuansBox' value='" + order.goodsCode + "' /></td>" +
+                "<td onclick='selectionGoods(\"" + order.goodsCode + "\")'>" + order.goodsCode + "</td>" +
+                "<td onclick='selectionGoods(\"" + order.goodsCode + "\")'>" + order.goodsName + "</td>" +
+                "<td onclick='selectionGoods(\"" + order.goodsCode + "\")'>" + (order.discount == null ? 0 : order.discount) + "</td>" +
+                "<td onclick='selectionGoods(\"" + order.goodsCode + "\")'>" + order.salesPrice + "</td>" +
+                "<td onclick='selectionGoods(\"" + order.goodsCode + "\")'>" + order.inventory + "</td>" +
+                "</tr>";
+        }
+        $("#goodsXuans").html(tableHtml);
+        $("#matching").text("找到" + result.length + "件匹配商品");
+    }
+    function selectionGoods(goodsCode) {
+
+        let td = $("#gRow" + goodsCode).find("td")[0];
+        if ($(td).find("input").is(':checked')) {
+            $(td).find("input").prop("checked", false);
+        } else {
+            $(td).find("input").prop("checked", true);
+        }
+    }
+
+    function clean() {
+        $('#goodsBody').html('');
+        dataList = new Map();
+        initSum();
+    }
+
+    function del() {
+        let goodsBox = $("input[name='goodsBox']:checked");
+        for (let i = 0, s = goodsBox.length; i < s; i++) {
+            let goodsCode = goodsBox[i].value;
+            $("#row" + goodsCode).remove();
+            dataList.delete(goodsCode + "");
+        }
+        initSum();
+    }
+
+    function save() {
+        if (dataList.size <= 0) {
+            $.message({
+                message: "请添加商品！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        }
+        let list = [];
+        let i = 0;
+        for (let key of dataList) {
+            let value = key[1]
+            if (value.num == undefined || value.num == null || value.num == 0) {
+                $.message({
+                    message: key[0] + "请输入购买数量！",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            list[i] = value;
+            i++;
+        }
+        let order = {
+            orderId: orderId,
+            fictitious: fictitious,
+            singleNum: dataList.size,
+            status: 0,
+            list: list
+        }
+        if (orderId == null) {
+            cashierPost("order/add.do", {order: JSON.stringify(order)}, saveFunction);
+        } else {
+            cashierPost("order/update.do", {order: JSON.stringify(order)}, saveFunction);
+        }
+    }
+
+    function saveFunction(result) {
+        if (result) {
+            orderId = result;
+            location.href = 'shoukuan.html?id=' + result;
+        } else {
+            $.message({
+                message: "结算失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function onKeyPress(e) {
+        var keyCode = null;
+        if(e.which) {
+            keyCode = e.which;
+        } else if(e.keyCode){
+            keyCode = e.keyCode;
+        }
+        if(keyCode == 13) {
+            getGoods();
+            return false;
+        }
+        return true;
+    }
+
+    function getGoods() {
+        let code = $("#code").val();
+        let goods = $("#goods").val();
+        if (goods == "" && code == "") {
+            $.message({
+                message: "请输入条形码/名称",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            cashierPost("goods/order.do", {goodsName: goods, goodsCode: code}, someFunction);
+        }
+    }
+
+    function someFunction(result) {
+        if (result == null || result.length <= 0) {
+            $.message({
+                message: "输入的商品未获取到！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            initTable(result);
+        }
+        $("#code").val("");
+        $("#goods").val("");
+    }
+
+    function initTable(result) {
+
+        let tableHtml = "";
+        for (let order of result) {
+            let goods = dataList.get(order.goodsCode + "");
+            if (goods != null && goods != undefined) {
+                goods.num += order.num;
+                if (goods.type == 1) {
+                    let o = new BigNumber(goods.costPrice).minus(goods.discount).times(goods.num) - 0;
+                    goods.subtotal = o;
+                } else {
+                    let o = new BigNumber(goods.costPrice).minus(goods.discount).times(goods.num) - 0;
+                    goods.subtotal = o;
+                }
+                let td5 = $("#row" + goods.goodsCode).find("td")[5];
+                $(td5).find("input").val(goods.num);
+                let td7 = $("#row" + goods.goodsCode).find("td")[7];
+                $(td7).text(goods.subtotal);
+                dataList.set(goods.goodsCode + "", goods);
+            } else {
+                if (order.type == 1) {
+                    let c = new BigNumber(order.costPrice).minus(order.discount);
+                    order.currentPrice = c - 0;
+                    let s = c.times(order.num) - 0;
+                    order.subtotal = s;
+
+                } else {
+                    let c = new BigNumber(order.costPrice).minus(order.discount);
+                    order.currentPrice = c - 0;
+                    let s = c.times(order.num) - 0;
+                    order.subtotal = s;
+                }
+                tableHtml +=
+                    "<tr id='row" + order.goodsCode + "'>" +
+                    "<td><input type='checkbox' name='goodsBox' value='" + order.goodsCode + "' /></td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.goodsCode + "</td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.goodsName + "</td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.costPrice + "</td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.discount + "</td>" +
+                    "<td><input type='text' onchange='resetGoods(\"" + order.goodsCode + "\",this)' value='" + (order.num == null ? 0 : order.num) + "'/></td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.currentPrice + "</td>" +
+                    "<td onclick='selection(\"" + order.goodsCode + "\")'>" + order.subtotal + "</td>" +
+                    "</tr>";
+                dataList.set(order.goodsCode + "", order);
+            }
+        }
+        if (tableHtml != null) {
+            $("#goodsBody").append(tableHtml);
+        }
+        initSum();
+    }
+
+    function resetGoods(goodsCode, input) {
+        let order = dataList.get(goodsCode + "");
+        order.num = parseInt(input.value);
+        if (order.type == 1) {
+            let o = new BigNumber(order.costPrice).minus(order.discount).times(order.num) - 0;
+            order.subtotal = o;
+        } else {
+            let o = new BigNumber(order.costPrice).minus(order.discount).times(order.num) - 0;
+            order.subtotal = o;
+        }
+        let td = $("#row" + goodsCode).find("td")[7];
+        $(td).text(order.subtotal);
+        initSum();
+    }
+
+    function initSum() {
+        let goodsNum = 0;
+        let subtotalSum = 0;
+        dataList.forEach(function (value, key) {
+            goodsNum += (value.num == null ? 0 : parseInt(value.num));
+            subtotalSum = new BigNumber(subtotalSum).plus(value.subtotal == null ? 0 : parseFloat(value.subtotal)) - 0;
+        });
+        $("#goodsNum").text(goodsNum);
+        $("#subtotalSum").text(subtotalSum);
+    }
+
+    function selection(goodsCode) {
+        let td = $("#row" + goodsCode).find("td")[0];
+        if ($(td).find("input").is(':checked')) {
+            $(td).find("input").prop("checked", false);
+        } else {
+            $(td).find("input").prop("checked", true);
+        }
+    }
+
+    $(function () {
+        $(document).keydown(function (event) {
+            if (event.keyCode == 32) {
+                save();
+            }
+        });
+        $("#account").text("操作员[" + user.account + "]");
+    });
+</script>
+</html>

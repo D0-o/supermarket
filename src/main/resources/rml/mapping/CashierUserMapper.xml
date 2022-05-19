@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierUserMapper">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+      delete from cashier_user
+      where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="rml.model.CashierUser" useGeneratedKeys="true" keyProperty="id">
+      insert into cashier_user (account, password, `type`, createTime, updateTime, loginTime,
+      parentId, createId)
+      values (#{account,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+      #{type,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
+      #{loginTime,jdbcType=TIMESTAMP}, #{parentId,jdbcType=BIGINT}, #{createId,jdbcType=BIGINT})
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="rml.model.CashierUser">
+        update cashier_user
+        <set>
+            <if test="account != null and '' != account">
+                account = #{account,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null and '' != password">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                `type` = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                updateTime = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="loginTime != null">
+                loginTime = #{loginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="parentId != null">
+                parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="selectByPrimaryKey" resultType="rml.model.CashierUser" parameterType="java.lang.Long">
+      select id, account, password, type, createTime, updateTime, loginTime
+      from cashier_user
+      where id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="select" resultType="rml.model.CashierUser">
+        select id, account, password, `type`, createTime, updateTime, loginTime, parentId, createId
+        from cashier_user
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="account != null and '' != account">
+                and account = #{account}
+            </if>
+            <if test="password != null and '' != password">
+                and password = #{password}
+            </if>
+            <if test="type != null">
+                and `type` = #{type}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="createId != null">
+                and createId = #{createId,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+    <select id="selectAll" resultType="rml.model.CashierUser">
+        select id, account, password, `type`, createTime, updateTime, loginTime, parentId, createId
+        from cashier_user
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="account != null and '' != account">
+                and account = #{account}
+            </if>
+            <if test="password != null and '' != password">
+                and password = #{password}
+            </if>
+            <if test="type != null">
+                and `type` = #{type}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="createId != null">
+                and createId = #{createId,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+
+</mapper>

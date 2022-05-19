@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierOrderMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_order
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierOrder" >
+    insert into cashier_order (orderId, amount,
+      fictitious, actualPay, num, singleNum,
+      status, unfinished, orderTime, 
+      updateTime, ramerk, uid,
+      uname, parentId)
+    values (#{orderId,jdbcType=VARCHAR}, #{amount,jdbcType=DECIMAL}, #{fictitious,jdbcType=DECIMAL},
+      #{actualPay,jdbcType=DECIMAL}, #{num,jdbcType=INTEGER}, #{singleNum,jdbcType=INTEGER},
+      #{status,jdbcType=INTEGER}, #{unfinished,jdbcType=VARCHAR}, #{orderTime,jdbcType=TIMESTAMP},
+      #{updateTime,jdbcType=TIMESTAMP}, #{ramerk,jdbcType=VARCHAR}, #{uid,jdbcType=BIGINT},
+      #{uname,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierOrder" >
+    update cashier_order
+    <set>
+      <if test="amount != null">
+        amount = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="fictitious != null">
+        fictitious = #{fictitious,jdbcType=DECIMAL},
+      </if>
+      <if test="actualPay != null">
+        actualPay = #{actualPay,jdbcType=DECIMAL},
+      </if>
+      <if test="giveChange != null">
+        giveChange = #{giveChange,jdbcType=DECIMAL},
+      </if>
+      <if test="num != null">
+        num = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="singleNum != null">
+        singleNum = #{singleNum,jdbcType=INTEGER},
+      </if>
+      <if test="payType != null and '' != payType">
+        payType = #{payType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="unfinished != null and '' != unfinished">
+        unfinished = #{unfinished,jdbcType=VARCHAR},
+      </if>
+      <if test="ramerk != null and '' != ramerk">
+        ramerk = #{ramerk,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uid != null">
+        uid = #{uid,jdbcType=BIGINT},
+      </if>
+      <if test="uname != null and '' != uname">
+        uname = #{uname,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null">
+        parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </set>
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null and '' != orderId">
+        and orderId = #{orderId,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierOrder" parameterType="rml.model.CashierOrder" >
+    select id, orderId, amount, fictitious, actualPay, giveChange, num, singleNum, payType, status,
+    unfinished, orderTime, updateTime, ramerk, uid, uname, parentId
+    from cashier_order
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null and '' != orderId">
+        and orderId = #{orderId,jdbcType=VARCHAR}
+      </if>
+      <if test="status != null">
+        and status = #{status,jdbcType=INTEGER}
+      </if>
+      <if test="payType != null and '' != payType">
+        and payType = #{payType,jdbcType=VARCHAR}
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierOrder" parameterType="rml.model.CashierOrder">
+    select id, orderId, amount, fictitious, actualPay, giveChange, num, singleNum, payType, status,
+    unfinished, orderTime, updateTime, ramerk, uid, uname, parentId
+    from cashier_order
+    <where>
+      <if test="id != null">
+          and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null and '' != orderId">
+          and orderId = #{orderId,jdbcType=VARCHAR}
+      </if>
+      <if test="status != null">
+          and status = #{status,jdbcType=INTEGER}
+      </if>
+      <if test="unfinished != null and '' != unfinished">
+          and unfinished = #{unfinished,jdbcType=VARCHAR}
+      </if>
+      <if test="ramerk != null and '' != ramerk">
+          and ramerk like CONCAT('%',#{ramerk},'%')
+      </if>
+      <if test="payType != null and '' != payType">
+          and payType = #{payType,jdbcType=VARCHAR}
+      </if>
+      <if test="uid != null">
+          and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="uname != null and '' != uname">
+          and uname like CONCAT('%',#{uname},'%')
+      </if>
+      <if test="parentId != null">
+          and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+      <if test="sTime != null and '' != sTime">
+        and orderTime <![CDATA[ >= ]]> #{sTime,jdbcType=VARCHAR}
+      </if>
+      <if test="eTime != null and '' != eTime">
+        and orderTime <![CDATA[ <= ]]> #{eTime,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+  <select id="selectByTime" resultType="rml.model.CashierOrder" parameterType="rml.model.CashierOrder">
+    select id, orderId, amount, fictitious, actualPay, giveChange, num, singleNum, payType, status,
+    unfinished, orderTime, updateTime, ramerk, uid, uname, parentId
+    from cashier_order
+    <where>
+      status = 0 and orderTime between date_sub(now(),interval 1 day) and  now()
+      <if test="orderId != null and '' != orderId">
+        and orderId = #{orderId,jdbcType=VARCHAR}
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+
+  <select id="selectReports" resultType="rml.model.CashierOrder" parameterType="rml.model.CashierReports">
+    select id, orderId, amount, fictitious, actualPay, giveChange, num, singleNum, payType, status,
+    unfinished, orderTime, updateTime, ramerk, uid, uname, parentId
+    from cashier_order o
+    <where>
+      o.status = 1
+      <if test="goodsCode != null and '' != goodsCode">
+        and exists (select 1 from cashier_order_goods d where d.goodsCode = #{goodsCode,jdbcType=VARCHAR} and o.orderId = d.orderId)
+      </if>
+      <if test="uid != null">
+        and o.uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and o.parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+      <if test="sTime != null and '' != sTime">
+        and o.orderTime <![CDATA[ >= ]]> #{sTime,jdbcType=VARCHAR}
+      </if>
+      <if test="eTime != null and '' != eTime">
+        and o.orderTime <![CDATA[ <= ]]> #{eTime,jdbcType=VARCHAR}
+      </if>
+    </where>
+  </select>
+</mapper>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jquery-confirm.min.css">
+    <title>商品进货</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/jquery-confirm.min.js"></script>
+    <script src="js/bignumber.js"></script>
+    <style>
+        .del {
+            margin: 0 2px;
+            background-color: #ff0000;
+            display: inline-block;
+            color: #fff;
+            padding: 0 1px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="nei_header" style="position: fixed; top: 0; left: 0; width: 100%; z-index: 999;">
+
+    <h3>商品进货</h3>
+    <div class="rentu">
+        <img src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+    </div>
+    <div class="jix">
+        <a href="kanjinhuo.html">历史入库>></a>
+    </div>
+</div>
+
+<section style="padding-bottom: 200px; padding-top: 100px">
+    <div class="main_box">
+        <div class="cont_box editpro_box">
+            <!--财务报表-->
+            <table border="0" cellspacing="0" cellpadding="0" class="table" id="table_box">
+                <thead>
+                <tr>
+                    <th>商品条码</th>
+                    <th>商品名称</th>
+                    <th>类型</th>
+                    <th>进货价(元)</th>
+                    <th>销售价(元)</th>
+                    <th>供货商</th>
+                    <th>进货数量</th>
+                    <th>批次号</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="goodsBody">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+
+<footer class="footer">
+
+    <div class="lst">
+        <ul>
+            <li>
+                <div class="saoma">
+                    <label> <input type="text" id="goods" placeholder="条形码/名称" onkeypress="return onKeyPress(event)">
+                        <span>扫码模式</span> </label>
+                </div>
+            </li>
+
+            <li>
+                <div class="moli">
+                    <ul style="width: 240px">
+                        <li style="width: 33%">
+                            <p id="warehousing">0件</p>
+                            <p>入库量</p>
+                        </li>
+                        <li style="width: 33%; border-right: 1px solid #0099cb;">
+                            <p id="totalSum">0元</p>
+                            <p>总金额</p>
+                        </li>
+                        <li style="width: 33%">
+                            <p id="sellingPrice">0元</p>
+                            <p>总售价</p>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            <li class="right_mo">
+                <div class="right_2" style="float: right; ">
+                    <button style="background-color: #ff5555;" onclick="save(0)">保存</button>
+                </div>
+            </li>
+            <li class="right_mo">
+                <div class="right_2" style="float: right; ">
+                    <button style="background-color: #ff5555;" onclick="otherBatch()">其他批次</button>
+                </div>
+            </li>
+            <li class="right_mo">
+                <div class="right_2" style="float: right; ">
+                    <button style="background-color: #ff5555;" onclick="save(1)">入库</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</footer>
+
+<!--编辑弹窗-->
+<div id="bakdate" class="popup">
+    <div class="mo_date" style="width: 700px; top: 45%; ">
+        <div class="mo_title">未入库商品 <span class="fet_out" style="cursor: pointer"
+                                          onclick="$('.popup').fadeOut()">×</span></div>
+        <div class="bianjikuang">
+            <ul>
+                <li>
+                    批次号：
+                    <select id="batchSelect" style="width: 167px; height: 34px;">
+                        <option value="">请选择</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+        <div class="mo_btn">
+            <button style="background-color: #0099cb;" onclick="selectData()">确认</button>
+            <button style="background-color: #0099cb;" onclick="$('.popup').fadeOut()">取消</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script type="application/javascript">
+    var dataList = new Map();
+    var batch = new Date().getTime();
+    var isbatch = false;
+
+    function onKeyPress(e) {
+        var keyCode = null;
+        if(e.which) {
+            keyCode = e.which;
+        } else if(e.keyCode){
+            keyCode = e.keyCode;
+        }
+        if(keyCode == 13) {
+            addGoods();
+            return false;
+        }
+        return true;
+    }
+
+
+    function selectData() {
+        batch = $("#batchSelect").val();
+        if(batch == null || batch == ""){
+            $.message({
+                message: "请选择批次号！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return
+        }
+        $("#goodsBody").html("");
+        isbatch=true;
+        cashierPost("ingoods/list.do", {batch: batch}, someFunction);
+        $('.popup').fadeOut()
+    }
+
+    function otherBatch() {
+        cashierPost("ingoods/select.do", {status: 0}, selectFunction);
+    }
+    function selectFunction(result) {
+        let tableHtml = "<option value=''>请选择</option>";
+        for (let m of result) {
+            tableHtml += "<option value='"+ m +"'>"+ m +"</option>";
+        }
+        $("#batchSelect").html(tableHtml)
+        showpop('#bakdate');
+    }
+    //弹框
+    function showpop(id) {
+        $(id).fadeIn();
+        var h = ($(window).height() - $(id).children('.popup-box').height()) / 2;
+        $(id).children('.popup-box').css('margin-top', h);
+    }
+
+    function save(status) {
+        if (dataList.size <= 0) {
+            $.message({
+                message: "请添加数据！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return
+        }
+        let list = []
+        let i = 0;
+        for (let key of dataList) {
+            let value = key[1]
+            if (value.goodsName == null || value.goodsName == "") {
+                $.message({
+                    message: key[0] + "编码下请填写商品名称",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            if (value.purchasePrice == undefined || value.purchasePrice == null) {
+                $.message({
+                    message: key[0] + "编码下请填写进货价",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            if (value.salesPrice == undefined || value.salesPrice == null) {
+                $.message({
+                    message: key[0] + "编码下请填写销售价",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+
+            if (value.inventory == undefined || value.inventory == null) {
+                $.message({
+                    message: key[0] + "编码下请填写入库数量",    //提示信息
+                    duration: 3000,
+                    type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                    showClose: false       //显示关闭按钮（默认：否）
+                });
+                return;
+            }
+            if (value.batch == undefined || value.batch == null) {
+                value.batch = batch
+            }
+            if (value.supplier == undefined || value.supplier == null) {
+                value.supplier = 1;
+            }
+            if (value.type == undefined || value.type == null) {
+                value.type = 1;
+            }
+            value.status = status;
+            list[i] = value;
+            i++;
+        }
+        cashierPost("ingoods/addlist.do", {model: JSON.stringify(list)}, listFunction);
+    }
+
+    function listFunction(result) {
+        if (result) {
+            $.message({
+                message: "保存成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            $("#goodsBody").html("");
+            dataList = new Map();
+            initSum();
+            $("#goods").val()
+        } else {
+            $.message({
+                message: "保存失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function addGoods() {
+        let goods = $("#goods").val();
+        if (goods == "") {
+            $.message({
+                message: "请输入条形码/名称",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            cashierPost("goods/all.do", {goodsName: goods}, someFunction);
+        }
+    }
+
+    function someFunction(result) {
+
+        if (result == null || result.length <= 0) {
+            $.message({
+                message: "输入的商品未获取到！",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        } else {
+            if (result.length == 1 && result[0].goodsName == null) {
+                $.confirm({
+                    title: '确定添加?',
+                    content: "未查到对应商品，确定添加输入的商品编号么？",
+                    boxWidth: '40%',
+                    buttons: {
+                        ok: {
+                            text: "确定",
+                            keys: ['enter'],
+                            action: function () {
+                                initTable(result);
+                            }
+                        },
+                        cancel: {
+                            text: "取消"
+                        }
+                    }
+                })
+            } else {
+                initTable(result);
+            }
+        }
+    }
+
+    function initTable(result) {
+        let tableHtml = "";
+        for (let m of result) {
+            if (isbatch && m.status != null && m.status == 1) {
+                continue;
+            }
+            dataList.set(m.goodsCode + "", m);
+            tableHtml +=
+                "<tr id='row" + m.goodsCode + "'>" +
+                "<td>" + m.goodsCode + "</td>" +
+                "<td><input type='text'onchange='resetGoods(\"" + m.goodsCode + "\",1,this)' value='" + (m.goodsName == null ? "" : m.goodsName) + "'/></td>" +
+                "<td><select onchange='resetGoods(\"" + m.goodsCode + "\",2,this)' style='height: 34px;'><option value='1'>通用商品</option></select></td>" +
+                "<td><input type='text' onchange='resetGoods(\"" + m.goodsCode + "\",3,this)' value='" + (m.purchasePrice == null ? "" : m.purchasePrice) + "'/></td>" +
+                "<td><input type='text' onchange='resetGoods(\"" + m.goodsCode + "\",4,this)' value='" + (m.salesPrice == null ? "" : m.salesPrice) + "'/></td>" +
+                "<td><select onchange='resetGoods(\"" + m.goodsCode + "\",5,this)' style='height: 34px;'>" +
+                "<option value='' selected>请选择供货商</option>" +
+                "<option value='1' >老李水果店</option>"+
+                "<option value='2' >老王肉铺店</option>"+
+                "<option value='3' >老张五金店</option>"+
+                "<option value='4' >老马百货批发店</option>"+
+                "</select></td>" +
+                "<td><input type='text' onchange='resetGoods(\"" + m.goodsCode + "\",6,this)' value='" + (m.inventory == null ? "" : m.inventory) + "'/></td>" +
+                "<td><input type='text' onchange='resetGoods(\"" + m.goodsCode + "\",7,this)' value='" + batch + "'/></td>" +
+                "<td><span class='del' onclick='delRow(\"" + m.goodsCode + "\")'>删除</span></td>" +
+                "</tr>";
+        }
+        isbatch=false;
+        $("#goodsBody").append(tableHtml);
+        initSum();
+    }
+
+    function resetGoods(goodsCode, tab, input) {
+        let data = dataList.get(goodsCode + "");
+        if (tab == 1) {
+            data.goodsName = (input.value == "" ? null : input.value);
+        } else if (tab == 2) {
+            data.type = (input.value == "" ? null : parseInt(input.value));
+        } else if (tab == 3) {
+            data.purchasePrice = (input.value == "" ? null : parseFloat(input.value));
+        } else if (tab == 4) {
+            data.salesPrice = (input.value == "" ? null : parseFloat(input.value));
+        } else if (tab == 5) {
+            data.supplier = (input.value == "" ? null : parseInt(input.value));
+        } else if (tab == 6) {
+            data.inventory = (input.value == "" ? null : parseInt(input.value));
+        } else if (tab == 7) {
+            data.batch = (input.value == "" ? null : input.value);
+        }
+        initSum();
+    }
+
+    function initSum() {
+        let totalSum = 0;
+        let sellingPrice = 0;
+        let warehousing = 0;
+        dataList.forEach(function (value, key) {
+            warehousing += (value.inventory == null ? 0 : parseInt(value.inventory));
+            totalSum = new BigNumber(totalSum).plus(value.purchasePrice == null ? 0 : parseFloat(value.purchasePrice)) - 0;
+            sellingPrice = new BigNumber(sellingPrice).plus(value.salesPrice == null ? 0 : parseFloat(value.salesPrice)) - 0;
+        });
+        $("#warehousing").text(warehousing + "件");
+        $("#sellingPrice").text(sellingPrice + "元");
+        $("#totalSum").text(totalSum + "元");
+    }
+
+    function delRow(goodsCode) {
+        $.confirm({
+            title: '确定删除?',
+            content: "确定删除入库商品码" + goodsCode + "么？",
+            boxWidth: '40%',
+            buttons: {
+                ok: {
+                    text: "确定",
+                    keys: ['enter'],
+                    action: function () {
+                        $("#row" + goodsCode).remove();
+                        dataList.delete(goodsCode + "")
+                        initSum();
+                    }
+                },
+                cancel: {
+                    text: "取消"
+                }
+            }
+        })
+    }
+</script>
+</html>

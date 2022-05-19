@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/diyUpload.css">
+  <link rel="stylesheet" href="css/webuploader.css">
+  <title>上传</title>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/diyUpload.js"></script>
+  <script src="js/webuploader.html5only.min.js"></script>
+</head>
+
+<body>
+<div class="nei_header" >
+  <h3>支付图片上传&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3>
+  <div class="rentu">
+    <img src="images/gongnengguanli.png" alt="" onclick="location.href='tab.html'">
+  </div>
+</div>
+<input type="file" name="file" class="webuploader-element-invisible" multiple="multiple" accept="image/*">
+<div style="text-align:center;width: 100%;margin:10px auto;">
+  <table align="center" width="100%">
+    <tr>
+      <td></td>
+      <td width="15%">
+        类型：
+        <select id="payType" style="width:167px;height: 25px;border: 1px solid #00b8c9;">
+          <option value="1">支付宝</option>
+          <option value="2" selected >微信</option>
+        </select>
+      </td>
+      <td width="15%">
+        账号：<input style="height: 25px;border: 1px solid #00b8c9;" id="acct" type="text"
+                  placeholder="账号"/>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan='4'>
+        <div id="demo" style="margin-top: 10px">
+          <div id="as" ></div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+</body>
+<script type="application/javascript">
+
+    /*
+      * 服务器地址,成功返回,失败返回参数格式依照jquery.ajax习惯;
+      * 其他参数同WebUploader
+      */
+      $('#as').diyUpload({
+        url: baseUrl + 'paytype/upfile.do?payType='+ $('#payType').val() + '&acct=' + $('#acct').val(),
+        success:function( data ) {
+          $.ajax({
+            async : false,
+            url : baseUrl + 'paytype/gxcashierPayType.do?payType='+ $('#payType').val() + '&acct=' + $('#acct').val()+'&id='+data.data,
+            dataType : "JSON",
+            type : "GET",
+            success : function(result) {
+              if (result > 0) {
+                console.info( result );
+              }
+            }
+          });
+          console.info("acct"+$('#acct').val())
+            console.info( data );
+        },
+        error:function( err ) {
+            console.info( err );
+        },
+        buttonText : '选择文件',
+        // 分片大小
+        chunkSize:512 * 1024,
+        //最大上传的文件数量, 总文件大小,单个文件大小(单位字节);
+        fileNumLimit:50,
+        fileSizeLimit:500000 * 1024,
+        fileSingleSizeLimit:50000 * 1024,
+        accept: {}
+    });
+
+</script>
+</html>

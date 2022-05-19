@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierGoodsSumMapper">
+    <select id="selectReports" resultType="rml.model.CashierGoodsSum" parameterType="rml.model.CashierReports">
+        select
+        g.goodsCode, g.goodsName, g.inventory, g.salesPrice, g.purchasePrice,
+        (g.salesPrice - g.purchasePrice) as profit, a.subtotal as `sum`,
+        round((g.salesPrice - g.purchasePrice) / g.salesPrice * 100, 2) as rate
+        from
+        (select d.goodsCode, sum(d.subtotal) as subtotal from cashier_order_goods d
+        inner join cashier_order o on o.orderId = d.orderId
+        <where>
+            o.status = 1
+            <if test="goodsCode != null and '' != goodsCode">
+                and d.goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and o.orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="uid != null">
+                and o.uid = #{uid,jdbcType=BIGINT}
+            </if>
+            <if test="parentId != null">
+                and o.parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </where>
+        group by
+        d.goodsCode
+        ) a
+        left join cashier_goods g on a.goodsCode = g.goodsCode
+    </select>
+    <select id="selectReportsTotal" resultType="rml.model.CashierGoodsSum" parameterType="rml.model.CashierReports">
+        select
+        sum(g.inventory) as inventory, sum(g.salesPrice) as salesPrice, sum(g.purchasePrice) as purchasePrice,
+        sum(g.salesPrice - g.purchasePrice) as profit, sum(a.subtotal) as `sum`
+        from
+        (select d.goodsCode, sum(d.subtotal) as subtotal from cashier_order_goods d
+        inner join cashier_order o on o.orderId = d.orderId
+        <where>
+            o.status = 1
+            <if test="goodsCode != null and '' != goodsCode">
+                and d.goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and o.orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="uid != null">
+                and o.uid = #{uid,jdbcType=BIGINT}
+            </if>
+            <if test="parentId != null">
+                and o.parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </where>
+        group by
+        d.goodsCode
+        ) a
+        left join cashier_goods g on a.goodsCode = g.goodsCode
+    </select>
+
+    <select id="selectReportsHistory" resultType="rml.model.CashierGoodsSum" parameterType="rml.model.CashierReports">
+        SELECT
+        goodsCode, goodsName, inventory, salesPrice, purchasePrice, profit, `sum`, rate
+        FROM
+        cashier_goods_history
+        <where>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectReportsHistoryTotal" resultType="rml.model.CashierGoodsSum"
+            parameterType="rml.model.CashierReports">
+        SELECT
+        sum(inventory) as inventory, sum(salesPrice) as salesPrice, sum(purchasePrice) as purchasePrice,
+        sum(profit) as profit, sum(`sum`) as `sum`
+        FROM
+        cashier_goods_history
+        <where>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid,jdbcType=BIGINT}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectReportsHistoryByPid" resultType="rml.model.CashierGoodsSum"
+            parameterType="rml.model.CashierReports">
+        select
+        goodsCode, goodsName, min(inventory) as inventory, min(salesPrice) as salesPrice,
+        min(purchasePrice) as purchasePrice, min(profit) as profit, sum(`sum`) as `sum`, min(rate) as rate
+        from
+        cashier_goods_history
+        <where>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </where>
+        group by goodsCode
+    </select>
+
+    <select id="selectReportsHistoryTotalByPid" resultType="rml.model.CashierGoodsSum"
+            parameterType="rml.model.CashierReports">
+        select
+        sum(inventory) as inventory, sum(salesPrice) as salesPrice, sum(purchasePrice) as purchasePrice,
+        sum(profit) as profit, sum(`sum`) as `sum`
+        from (select
+        goodsCode, goodsName, min(inventory) as inventory, min(salesPrice) as salesPrice,
+        min(purchasePrice) as purchasePrice, min(profit) as profit, sum(`sum`) as `sum`
+        from
+        cashier_goods_history
+        <where>
+            <if test="goodsCode != null and '' != goodsCode">
+                and goodsCode = #{goodsCode}
+            </if>
+            <if test="time != null and '' != time">
+                and orderTime between #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null">
+                and parentId = #{parentId,jdbcType=BIGINT}
+            </if>
+        </where>
+        group by goodsCode) a
+    </select>
+
+    <update id="update" parameterType="rml.model.CashierGoodsSum">
+      INSERT INTO cashier_goods_history(goodsCode, goodsName, inventory, salesPrice, purchasePrice, profit,
+        `sum`, rate, uid, parentId, createTime, orderTime)
+      SELECT
+        g.goodsCode, g.goodsName, g.inventory, g.salesPrice, g.purchasePrice,
+	    (g.salesPrice - g.purchasePrice) AS profit, a.subtotal AS `sum`,
+	    round((g.salesPrice - g.purchasePrice) / g.salesPrice * 100,2) AS rate,
+        a.uid,a.parentId,NOW(),a.dt
+      FROM
+	  (
+		SELECT
+			d.goodsCode, sum(d.subtotal) AS subtotal, o.uid, o.parentId,DATE_FORMAT(o.orderTime,'%Y-%m-%d') as dt
+		FROM
+			cashier_order_goods d
+		INNER JOIN cashier_order o ON o.orderId = d.orderId
+		WHERE
+			o.STATUS = 1 AND o.orderTime BETWEEN #{sTime,jdbcType=VARCHAR} and #{eTime,jdbcType=VARCHAR}
+		GROUP BY
+			d.goodsCode, o.uid, o.parentId,dt
+	  ) a
+      LEFT JOIN cashier_goods g ON a.goodsCode = g.goodsCode
+    </update>
+
+
+    <select id="selectChart" resultType="java.util.Map" parameterType="java.util.Map">
+        SELECT
+            <if test="top == null">
+                <if test="goodsCode == null or '' == goodsCode">
+                    '总销售' AS `name`,
+                </if>
+                <if test="goodsCode != null and '' != goodsCode">
+                    MAX(d.goodsName) AS `name`,
+                </if>
+            </if>
+            <if test="top != null">
+                MAX(d.goodsName) AS `name`,
+            </if>
+            <foreach collection="m" index="index" item="item" separator=",">
+                SUM(CASE WHEN DATE_FORMAT(o.orderTime,'%Y-%m-%d') = #{item} THEN d.subtotal ELSE 0 END) AS #{item}
+            </foreach>
+            ,SUM(d.subtotal) AS total
+		FROM
+			cashier_order_goods d
+		INNER JOIN cashier_order o ON o.orderId = d.orderId
+		WHERE
+			o.STATUS = 1 AND o.orderTime BETWEEN #{sTime,jdbcType=VARCHAR} AND #{eTime,jdbcType=VARCHAR}
+            <if test="pid != null">
+                AND o.parentId = #{pid,jdbcType=BIGINT}
+            </if>
+            <if test="uid != null">
+                AND o.uid = #{uid,jdbcType=BIGINT}
+            </if>
+            <if test="goodsCode != null and '' != goodsCode">
+                AND d.goodsCode = #{goodsCode}
+            </if>
+        <if test="top != null">
+            GROUP BY d.goodsCode ORDER BY total DESC LIMIT #{top}
+        </if>
+    </select>
+</mapper>

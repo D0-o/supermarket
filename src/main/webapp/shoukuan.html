@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>收款</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/bignumber.js"></script>
+</head>
+
+<body >
+<div class="nei_header" >
+
+    <h3>收款</h3>
+     <div class="rentu">
+         <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+     </div>
+</div>
+
+
+
+
+
+
+<div class="con_sec">
+
+        <div class="jisuan">
+            <ul>
+                <li><span style="background-color: #73b7b8;">总额：</span>  <input id="amount" type="text" readonly style="color:#73b7b8;"> <button class="on" style="background-color: #ff5555;">现金</button></li>
+                <li><span style="background-color: #cb636e;">实付：</span>  <input id="actualPay" type="text" style="color:#cb636e;" onchange="payAmount()"> <button class="on" onclick="pay('ZFB')">支付宝</button></li>
+                <li><span style="background-color: #73b7b8;">优惠：</span>  <input id="fictitious" type="text" readonly style="color:#73b7b8;"> <button class="on" onclick="pay('WX')">微信</button></li>
+                <li><span style="background-color: #73b7b8;">找零：</span>  <input id="giveChange" value="0" readonly type="text" style="color:#73b7b8;"> <button class="on" onclick="pay('YHK')">银行卡</button></li>
+            </ul>
+        </div>
+
+
+    <div class="bing_box">
+        <div class="anjian">
+            <div class="sdleft">
+
+                <input type="button" value="1" onclick="meter(this.value)">
+                <input type="button" value="2" onclick="meter(this.value)">
+                <input type="button" value="3" onclick="meter(this.value)">
+                <input type="button" value="4" onclick="meter(this.value)">
+                <input type="button" value="5" onclick="meter(this.value)">
+                <input type="button" value="6" onclick="meter(this.value)">
+                <input type="button" value="7" onclick="meter(this.value)">
+                <input type="button" value="8" onclick="meter(this.value)">
+                <input type="button" value="9" onclick="meter(this.value)">
+                <input type="button" value="0" onclick="meter(this.value)">
+                <input type="button" value="00" onclick="meter(this.value)">
+                <input type="button" value="." onclick="meter(this.value)">
+            </div>
+            <div class="sfrit">
+                <div class="mio">
+                    <input type="button" class="qingc" onclick="meter('-1')">
+                    <input type="button" value="支付" class="que" onclick="pay('XJ')">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<!--左侧展开折扣-->
+<div class="box">
+    <div class="change-type">
+        <div class="type-left" :class="showType == true ? 'showListType':''">
+
+            <div class="tabbox">
+                <div class="tab">
+                    <a href="javascript:;" class="on">整单折扣</a>
+                    <a href="javascript:;">优惠卷</a>
+                </div>
+                <div class="content">
+                    <ul>
+                        <li style="display:block;">
+                            <input type="text" value="100%" class="milo">
+                            <span onclick="calculation(95)">95折</span>
+                            <span onclick="calculation(90)">9折</span>
+                            <span onclick="calculation(85)">85折</span>
+                            <span onclick="calculation(80)">8折</span>
+                            <span onclick="calculation(75)">75折</span>
+                            <span onclick="calculation(70)">7折</span>
+                            <span onclick="calculation(60)">6折</span>
+                            <span onclick="calculation(50)">5折</span>
+                            <span onclick="calculation(0)">免单</span>
+                            <span onclick="calculation(-1)">原价</span>
+                        </li>
+                        <li>
+                            <input type="text" value="扫描或者输入优惠卷号" class="milo" onchange="coupon()">
+
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="type-right">
+            <p>
+                <i class="el-icon-menu"></i>
+                折扣
+            </p>
+        </div>
+    </div>
+</div>
+<script type="application/javascript">
+    $(function(){
+        $('.type-right').click(function(){
+            $(this).prev('.type-left').toggleClass('showListType')
+        });
+        $('.type-left ul li').click(function(){
+            $(this).addClass('active').siblings('li').removeClass('active')
+        });
+
+
+
+        //tab栏
+
+        $(".tabbox .tab a").mouseover(function(){
+            $(this).addClass('on').siblings().removeClass('on');
+            var index = $(this).index();
+            number = index;
+            $('.tabbox .content li').hide();
+            $('.tabbox .content li:eq('+index+')').show();
+        });
+
+        var auto = 0;  //等于1则自动切换，其他任意数字则不自动切换
+        if(auto ==1){
+            var number = 0;
+            var maxNumber = $('.tabbox .tab a').length;
+            function autotab(){
+                number++;
+                number == maxNumber? number = 0 : number;
+                $('.tabbox .tab a:eq('+number+')').addClass('on').siblings().removeClass('on');
+                $('.tabbox .content ul li:eq('+number+')').show().siblings().hide();
+            }
+            var tabChange = setInterval(autotab,3000);
+            //鼠标悬停暂停切换
+            $('.tabbox').mouseover(function(){
+                clearInterval(tabChange);
+            });
+            $('.tabbox').mouseout(function(){
+                tabChange = setInterval(autotab,3000);
+            });
+        }
+    })
+</script>
+<!--左侧展开折扣-->
+
+
+
+
+</body>
+<script type="application/javascript">
+    var proportion = 100;
+    var orderId = null;
+    var pAmt = 0;
+    function pay(type) {
+        let order = {
+            orderId: orderId,
+            actualPay: $("#actualPay").val(),
+            fictitious: $("#fictitious").val(),
+            giveChange: $("#giveChange").val(),
+            payType: type
+        };
+        let actualPay = $("#actualPay").val();
+        let amount = $("#amount").val();
+        let fictitious = $("#fictitious").val()!="" ? $("#fictitious").val():0 ;
+        console.log("1:"+actualPay=="")
+        console.log("12:"+actualPay+fictitious<amount)
+        console.log("123:"+actualPay==""||actualPay+fictitious<amount)
+        if (parseFloat(actualPay)+parseFloat(fictitious)<parseFloat(amount)) {
+            $.message({
+                message: "当前金额低于实付金额",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        }
+        cashierPost("order/edit.do",order , payFunction);
+    }
+
+    function payFunction(result) {
+
+        if (result) {
+            $.message({
+                message: "支付成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            location.href = 'wancheng.html?id=' + result;
+        } else {
+            $.message({
+                message: "支付失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+
+    function meter(num) {
+        let actualPay = $("#actualPay").val();
+        if(actualPay != "" && parseFloat(actualPay) == pAmt){
+            $("#actualPay").val("");
+            actualPay = "";
+        }
+        if(num != -1){
+            let pay = actualPay + "" + num;
+            $("#actualPay").val(pay);
+        } else {
+            let pay = actualPay.length == 1 ? "" : (actualPay.substring(0,actualPay.length-1));
+            $("#actualPay").val(pay);
+            if(pay!=""){
+                payAmount();
+            }else {
+                $("#giveChange").val(0);
+            }
+        }
+        if(num != "." && num != "-1"){
+            payAmount();
+        }
+    }
+
+    function payAmount() {
+        let actualAmount = parseFloat($("#actualPay").val());
+        let amount = parseFloat($("#amount").val());
+        let actualPay = 0;
+        if(actualAmount == amount) {
+            actualPay = amount;
+        } else if(proportion == 100){
+            actualPay = amount;
+        }else  if(proportion != -1){
+            let o = new BigNumber(amount).dividedBy(100).times(proportion) - 0;
+            actualPay = keepTwoDecimal(o);
+        } else {
+            actualPay = amount;
+        }
+        $("#fictitious").val(new BigNumber(amount).minus(actualPay) - 0);
+        $("#giveChange").val(new BigNumber(actualAmount).minus(actualPay) - 0);
+    }
+
+    function coupon() {
+        $.message({
+            message: "未查到对应优惠码",    //提示信息
+            duration: 2000,
+            type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+            showClose: false       //显示关闭按钮（默认：否）
+        });
+    }
+    function calculation(num) {
+        proportion = num;
+        let amount = parseFloat($("#amount").val());
+        if(proportion != -1){
+            let o = new BigNumber(amount).dividedBy(100).times(proportion) - 0;
+            let actualPay = keepTwoDecimal(o);
+            $("#actualPay").val(actualPay);
+            $("#fictitious").val((amount - actualPay).toFixed(2));
+            $("#giveChange").val(0);
+        } else {
+            $("#actualPay").val(amount);
+            $("#fictitious").val(0);
+            $("#giveChange").val(0);
+        }
+    }
+    function someFunction(result) {
+        if(result != null){
+            $("#amount").val(result.amount);
+            pAmt = parseFloat(result.amount) - 0;
+            $("#fictitious").val(result.fictitious);
+            $("#actualPay").val(result.actualPay);
+        } else {
+            $.message({
+                message: "订单异常无法支付",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+
+    }
+
+    $(function () {
+
+        let request = getRequestId(location.search);
+        orderId = request['id']; //ID
+        cashierPost("order/get.do", {orderId: orderId}, someFunction);
+    });
+</script>
+
+</html>

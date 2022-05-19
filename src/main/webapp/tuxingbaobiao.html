@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>报表</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/highcharts.js"></script>
+    <script src="js/exporting.js"></script>
+    <script src="js/series-label.js"></script>
+    <script src="js/oldie.js"></script>
+    <script src="js/highcharts-zh_CN.js"></script>
+    <script src="js/message.js"></script>
+</head>
+<body>
+<div class="nei_header">
+    <h3>报表</h3>
+    <div class="rentu">
+        <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+    </div>
+    <i class="moix"onclick="location.href='tab.html'">菜单</i>
+</div>
+
+
+<div class="danju_con">
+
+    <div class="danju_left shezhi_left">
+        <div class="dan_title" style="text-align: center; font-size: 18px;">
+            报表类型
+        </div>
+
+        <div class="danju_lis shezhi">
+            <ul>
+                <li onclick="location.href='shangpinbaobiao.html'"> 商品报表</li>
+                <li onclick="location.href='shourubaobiao.html'"> 收入报表</li>
+                <li class="on"> 图形报表</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!--&lt;!&ndash;订单设置开始&ndash;&gt;-->
+
+    <div class="shezhi_con">
+        <div class="lst">
+            <table style="position: absolute; top: 80px; width: 78%; height: 40px; overflow-y: auto;">
+                <tr>
+                    <td>
+                        类型：
+                        <select id="top" style="width:167px;height: 25px;border: 1px solid #00b8c9;" onchange="getData()">
+                            <option value="">请选择</option>
+                            <option value="5">销售前5</option>
+                            <option value="10">销售前10</option>
+                            <option value="20">销售前20</option>
+                        </select>
+                    </td>
+                    <td width="40%">
+                        时间：
+                        <input style="height: 25px;border: 1px solid #00b8c9;" id="sTime" type="date" onchange="getData()">
+                        -
+                        <input style="height: 25px;border: 1px solid #00b8c9;" id="eTime" type="date" onchange="getData()">
+                    </td>
+                    <td width="25%">
+                        商品编码：<input style="height: 25px;border: 1px solid #00b8c9;" id="goodsCode" type="text"
+                                    placeholder="商品编码" onchange="getData()"/>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div id="container" style="max-width:100%;height:60%;margin-top: 5%"></div>
+
+        <!--底部-->
+    </div>
+
+</div>
+
+
+</body>
+<script type="application/javascript">
+    var chart = null;
+
+    function getData() {
+        let sTime = $("#sTime").val();
+        if(sTime == null || sTime == ''){
+            return
+        }
+        let eTime = $("#eTime").val();
+        if(eTime == null || eTime == ''){
+            return
+        }
+        var aDate = eTime.split("-");
+        var oDate1 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);  //结束日期
+        aDate = sTime.split("-");
+        var oDate2 = new Date(aDate[1] + '-' + aDate[2] + '-' + aDate[0]);    //开始日期
+        if(oDate1 <= oDate2) {
+            $.message({
+                message: "'结束日期'必须大于'开始日期'!",    //提示信息
+                duration: 3000,
+                type: 'warning',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+            return;
+        }
+        cashierPost("reports/graphical.do", {
+            sTime: sTime,
+            eTime: eTime,
+            top: $("#top").val(),
+            goodsCode: $("#goodsCode").val()
+        }, someFunction);
+    }
+
+    function someFunction(result) {
+        chart = Highcharts.chart('container', {
+            title: {
+                text: '周期销售报表'
+            },
+            xAxis: {
+                categories: result.m
+            },
+            yAxis: {
+                title: {
+                    text: '金额（元）'
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        // 开启数据标签
+                        enabled: true
+                    }
+                }
+            },
+            series: result.d,
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500
+                    },
+                    chartOptions: {
+                        legend: {
+                            layout: 'horizontal',
+                            align: 'center',
+                            verticalAlign: 'bottom'
+                        }
+                    }
+                }]
+            }
+        });
+    }
+
+    $(function () {
+        let datew = dufDay();
+        let saven = savenDay();
+        $("#sTime").val(saven);
+        $("#eTime").val(datew);
+        getData();
+    });
+
+
+</script>
+</html>

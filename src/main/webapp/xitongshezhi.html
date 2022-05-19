@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/style.css">
+    <title>系统设置</title>
+    <script src="js/jquery-1.10.1.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/message.js"></script>
+    <script src="js/LodopFuncs.js"></script>
+</head>
+<body>
+<div class="nei_header">
+    <h3>系统设置</h3>
+    <div class="rentu">
+        <img src="images/renturn.png" alt="" onclick="window.history.back(-1)">
+    </div>
+    <i class="moix" onclick="location.href='tab.html'">菜单</i>
+</div>
+
+
+<div class="danju_con">
+
+    <div class="danju_left shezhi_left">
+        <div class="dan_title" style="text-align: center; font-size: 18px;">
+            系统设置
+        </div>
+
+        <div class="danju_lis shezhi">
+            <ul>
+                <li class="on"> 通用设置</li>
+                <li onclick="location.href='zhifushezhi.html'"> 订单设置</li>
+                <li onclick="location.href='zhanghaoshezhi.html'"> 账号管理</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!--&lt;!&ndash;通用设置开始&ndash;&gt;-->
+
+
+    <!--<div class="shezhi_con">-->
+    <!--<div class="shenei">-->
+    <!--<ul>-->
+    <!--<li>商店名称： <input type="text" value="hh"></li>-->
+    <!--<li>商店地址： <input type="text" value="南宁市西乡区"></li>-->
+    <!--<li>客服电话：<input type="text" value="13000000000" style="color: #84c44c;"></li>-->
+    <!--<li>开启备用金：  <input type="checkbox" class="switch" checked> </li>-->
+    <!--<li>是否和并商品： <input type="checkbox" checked></li>-->
+    <!--<li>在主页显示新增商品： <input type="checkbox" checked></li>-->
+    <!--<li>是否开启导购员提醒： <input type="checkbox" checked></li>-->
+    <!--<li>未处理订单重复提醒： <input type="checkbox" checked></li>-->
+    <!--<li ><input type="checkbox"checked>开机启动 <button>手动同步数据</button><button>系统快捷</button></li>-->
+    <!--</ul>-->
+
+    <!--</div>-->
+
+    <!--</div>-->
+
+    <!--&lt;!&ndash;通用设置结束&ndash;&gt;-->
+
+
+    <!--小票打印设置开始-->
+
+
+    <div class="shezhi_con xiaopiao">
+        <div class="shenei">
+            <ul>
+                <li class="cef"><span onclick="printTest()">测试</span></li>
+                <li>
+                    <div class="guada">收银机器号： <span><input type="text" id="machine" value="1">  </span></div>
+                </li>
+                <li>
+                    <div class="guada">打印张数： <span><input type="text" id="number" value="1">张  </span></div>
+                </li>
+                <li>
+                    <div class="guada">标题： <span><input id="title" value="超市小票" style="text-align: left;width: 400px" type="text"></span>
+                    </div>
+                </li>
+                <li>
+                    <div class="guada">地址： <span><input id="address" style="text-align: left;width: 400px" type="text"></span>
+                    </div>
+                </li>
+                <li>
+                    <div class="guada">电话： <span><input id="tel" style="text-align: left;width: 400px"
+                                                        type="text"></span></div>
+                </li>
+                <li>
+                    <div class="guada">备注： <span><input id="ramerk" style="text-align: left;width: 400px"
+                                                        type="text"></span></div>
+                </li>
+                <li>是否预览： <input type="checkbox" id="preview"></li>
+                <li>是否自动打印： <input type="checkbox" checked id="auto"></li>
+                <li>是否有效： <input type="checkbox" checked id="status"></li>
+                <li>
+                    <div class="dan_btn">
+                        <button onclick="save()">保存</button>
+                        <button onclick="down('64')">64驱动下载</button>
+                        <button onclick="down('32')">32驱动下载</button>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <!--小票打印设置结束-->
+
+
+    <!--&lt;!&ndash;标签打印设置开始&ndash;&gt;-->
+
+
+    <!--<div class="shezhi_con">-->
+    <!--<div class="shenei jisid">-->
+    <!--<ul>-->
+    <!--<li>网口打印机： <input type="text" value="hh"></li>-->
+    <!--<li>USB标签打印机： <select name="">-->
+    <!--<option value="">惠普打印机</option> </select></li>-->
+    <!--<li>-->
+    <!--销售标签模板规格： <select name="" ><option value="">系统默认模板（40*30）</option> </select>-->
+    <!--<p style="color: red; line-height: 20px; font-size: 14px;">注：如需修改或者新增模板请到云端后代修改或者创建</p>-->
+    <!--</li>-->
+    <!--<li>-->
+    <!--商标模板规格：  <select name="" ><option value="">系统默认模板（40*30）</option> </select>-->
+    <!--<p style="color: red; line-height: 20px; font-size: 14px;">注：如需修改或者新增模板请到云端后代修改或者创建</p>-->
+    <!--</li>-->
+    <!--<li>和并打标签： <input type="checkbox" checked></li>-->
+    <!--<li>食堂打标签： <input type="checkbox" checked></li>-->
+    <!--<li class="koiu">-->
+    <!--<p class="weizhu">标签尾注：</p>-->
+    <!--<textarea name="" id="" cols="30" rows="10" class="ernx"></textarea>-->
+    <!--<span style="color: red">注：标签尾注每11个字要换行</span>-->
+
+    <!--</li>-->
+    <!--<li>-->
+    <!--<button style="color: #fff; background-color: #00abe6;">打印驱动</button>-->
+    <!--</li>-->
+    <!--</ul>-->
+
+    <!--</div>-->
+
+    <!--</div>-->
+
+    <!--&lt;!&ndash;标签设置结束&ndash;&gt;-->
+
+
+    <!--&lt;!&ndash;订单设置开始&ndash;&gt;-->
+
+    <!--<div class="shezhi_con">-->
+    <!--<div class="shenei">-->
+    <!--<ul>-->
+    <!--<li>牌号：<input type="checkbox" checked></li>-->
+    <!--<li>外带： <input type="checkbox" checked></li>-->
+    <!--<li>外送：<input type="checkbox" checked></li>-->
+    <!--<li>堂食： <input type="checkbox" class="switch" checked> </li>-->
+    <!--<li>挂单时候是否填写服务人员或备注 <input type="checkbox" checked></li>-->
+    <!--<li>收银时是否填写服务人数： <input type="checkbox" checked></li>-->
+    <!--<li>开启挂启功能： <input type="checkbox" checked></li>-->
+    <!--<li>开启会员单据同步上传功能： <input type="checkbox" checked></li>-->
+    <!--</ul>-->
+
+    <!--</div>-->
+
+    <!--</div>-->
+
+    <!--&lt;!&ndash;订单设置结束&ndash;&gt;-->
+
+
+    <!--&lt;!&ndash;功能设置开始&ndash;&gt;-->
+
+    <!--<div class="shezhi_con">-->
+    <!--<div class="shenei gonneng">-->
+    <!--<ul>-->
+    <!--<li>使用IC会员卡：<input type="checkbox" checked></li>-->
+    <!--<li>会员生日提醒： <input type="checkbox" checked></li>-->
+    <!--<li>是否客显：<input type="checkbox" checked></li>-->
+    <!--<li class="kaxian">客显地址：<select name="" id="">-->
+    <!--<option value="">COM3</option> </select> 波特率：2400 <span>清除  </span><span>单价 <em>8.8</em></span><span>总价 <em>8.8</em></span><span>找零 <em>8.8</em></span> </li>-->
+    <!--<li>主分机 <input type="checkbox" checked></li>-->
+    <!--<li>自动锁屏 <input type="checkbox" checked></li>-->
+    <!--<li>显示货号： <input type="checkbox" checked></li>-->
+    <!--<li>单据备注是否必填： <input type="checkbox" checked></li>-->
+    <!--<li>会员检索： <input type="checkbox" checked></li>-->
+    <!--<li>启用安全模式： <input type="checkbox" checked></li>-->
+    <!--</ul>-->
+
+    <!--</div>-->
+
+    <!--</div>-->
+    <!--&lt;!&ndash;功能设置结束&ndash;&gt;-->
+
+
+    <!--&lt;!&ndash;账号管理开始&ndash;&gt;-->
+
+    <!--<div class="shezhi_con">-->
+    <!--<div class="shenei">-->
+    <!--<div class="duihcu">-->
+    <!--<p>当前账号： <em>903904</em></p>-->
+    <!--<button>注销</button>-->
+    <!--<button>恢复默认设置</button>-->
+    <!--<p>本机IP：<em>192.163.8</em></p>-->
+    <!--</div>-->
+
+
+    <!--</div>-->
+
+    <!--</div>-->
+
+    <!--&lt;!&ndash;账号管理结束&ndash;&gt;-->
+
+
+</div>
+
+
+</body>
+<script type="application/javascript">
+    var data = null;
+    var account = window.sessionStorage.getItem("account");
+    var user = JSON.parse(account);
+
+    function down(v) {
+        window.location = baseUrl + 'payfile/install_lodop'+ v +'.exe';
+    }
+    function printTest() {
+        var LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INIT("超市打印预览");
+        let t =
+            `
+       <table id="LODOP_OB" style="width: 240px;">
+        <thead>
+            <tr>
+              <th colspan="4" style="font-size: 1.1em;font-weight: bold">${data.title}</th>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 0.7em;">收银员: ${user.id}</td>
+              <td colspan="2" style="font-size: 0.7em;text-align: right;">机器号: ${data.machine}</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size: 0.7em;">消费时间: ${dateFtt("yyyy-MM-dd hh:mm:ss", new Date())}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.7em;">流水号: DYZ00000011111</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+              <th style="font-size: 0.7em;text-align: left;">商品名</th>
+              <th style="font-size: 0.7em;">数量</th>
+              <th style="font-size: 0.7em;">单价</th>
+              <th style="font-size: 0.7em;text-align: right;">小计</th>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <td style="font-size: 0.7em;font-weight: bold" colspan="4">可口可乐</td>
+            </tr>
+            <tr>
+              <td style="font-size: 0.7em;text-align: left;font-weight: bold">1</td>
+              <td style="font-size: 0.7em;font-weight: bold">1</td>
+              <td style="font-size: 0.7em;font-weight: bold">3.00</td>
+              <td style="font-size: 0.7em;text-align: right;font-weight: bold">3.00</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+                <td colspan="2" style="font-size: 0.7em;font-weight: bold">数量合计: 1</td>
+                <td colspan="2" style="font-size: 0.7em;text-align: right;font-weight: bold">总金额: 3.00</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size: 0.7em;text-align: right;font-weight: bold">优惠金额: 0</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.7em;text-align: right;font-weight: bold">找零金额: 0</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 0.7em;font-weight: bold">支付类型: 现金</td>
+              <td colspan="2" style="font-size: 0.7em;text-align: right;font-weight: bold">实付金额: 3.00</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="align-content: center;">- - - - - - - - - - - - - - - - - - - - - - - - -</th>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">地址: ${data.address}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">电话: ${data.tel}</td>
+            </tr>
+            <tr>
+              <td colspan="4" style="font-size: 0.8em;">${data.ramerk}</td>
+            </tr>
+            <tr>
+              <th colspan="4" style="font-size: 0.8em;font-weight: bold">谢谢惠顾</th>
+            </tr>
+            <tr>
+              <th colspan="4" style="font-size: 0.8em;font-weight: bold">欢迎下次光临</th>
+            </tr>
+        </tbody>
+      </table>
+    `;
+
+        LODOP.ADD_PRINT_HTM(10, 10, 200, 340 + 35 * 1, t);
+        LODOP.PREVIEW();
+    }
+
+    function someFunction(result) {
+        if (result != null) {
+            data = JSON.parse(result.json);
+            $("#title").val(data.title);
+            $("#machine").val(data.machine);
+            $("#number").val(data.number);
+            $("#address").val(data.address);
+            $("#tel").val(data.tel);
+            $("#ramerk").val(data.ramerk);
+            if (data.preview - 0 == 1) {
+                $("#preview").attr("checked", true);
+            } else {
+                $("#preview").attr("checked", false);
+            }
+            if (result.status - 0 == 1) {
+                $("#status").attr("checked", true);
+            } else {
+                $("#status").attr("checked", false);
+            }
+            if (data.auto - 0 == 1) {
+                $("#auto").attr("checked", true);
+            } else {
+                $("#auto").attr("checked", false);
+            }
+
+        }
+    }
+
+    function saveFunction(result) {
+        if (result) {
+            $.message({
+                message: "成功",    //提示信息
+                duration: 3000,
+                type: 'success',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        } else {
+            $.message({
+                message: "失败",    //提示信息
+                duration: 3000,
+                type: 'error',           //显示类型，包括4种：success.error,info,warning 默认info
+                showClose: false       //显示关闭按钮（默认：否）
+            });
+        }
+    }
+    
+    function save() {
+        let machine = $("#machine").val();
+        let number = $("#number").val();
+        let address = $("#address").val();
+        let tel = $("#tel").val();
+        let ramerk = $("#ramerk").val();
+        let title = $("#title").val();
+        let preview = 0;
+        if ($("#preview").is(':checked') == true) {
+            preview = 1;
+        }
+        let status = 1;
+        if ($("#status").is(':checked') == false) {
+            status = 0;
+        }
+        let auto = 1;
+        if ($("#auto").is(':checked') == false) {
+            auto = 0;
+        }
+        let c = {
+            title: title,
+            machine: machine,
+            number: number,
+            address: address,
+            tel: tel,
+            ramerk: ramerk,
+            preview: preview,
+            auto: auto
+        };
+        data = c;
+        cashierPost("conf/update.do", {code: "1", json: JSON.stringify(c),status: status}, saveFunction);
+    }
+
+    $(function () {
+        cashierPost("conf/get.do", {code: '1'}, someFunction);
+    });
+</script>
+</html>

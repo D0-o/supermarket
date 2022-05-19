@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierMenuMapper">
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from cashier_menu
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="rml.model.CashierMenu" useGeneratedKeys="true" keyProperty="id">
+    insert into cashier_menu (menuName, icon, menuUrl,
+      menuType, uiType, `type`, `sort`
+      )
+    values (#{menuName,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{menuUrl,jdbcType=VARCHAR},
+      #{menuType,jdbcType=INTEGER}, #{uiType,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{sort,jdbcType=INTEGER}
+      )
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="rml.model.CashierMenu">
+        update cashier_menu
+        <set>
+            <if test="menuName != null and '' != menuName">
+                menuName = #{menuName,jdbcType=VARCHAR},
+            </if>
+            <if test="icon != null and '' != icon">
+                icon = #{icon,jdbcType=VARCHAR},
+            </if>
+            <if test="menuUrl != null and '' != menuUrl">
+                menuUrl = #{menuUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="menuType != null">
+                menuType = #{menuType,jdbcType=INTEGER},
+            </if>
+            <if test="uiType != null">
+                uiType = #{uiType,jdbcType=INTEGER},
+            </if>
+            <if test="type != null">
+                `type` = #{type,jdbcType=INTEGER}
+            </if>
+            <if test="sort != null">
+                `sort` = #{sort,jdbcType=INTEGER}
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="selectByPrimaryKey" resultType="rml.model.CashierMenu" parameterType="java.lang.Long">
+    select id, menuName, icon, menuUrl, menuType, uiType, `type`, `sort`
+    from cashier_menu
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+    <select id="selectAll" resultType="rml.model.CashierMenu" parameterType="rml.model.CashierMenu">
+        select id, menuName, icon, menuUrl, menuType, uiType, `type`, `sort`
+        from cashier_menu
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="menuName != null and '' != menuName">
+                and menuName = #{menuName}
+            </if>
+            <if test="menuType != null">
+                and menuType = #{menuType}
+            </if>
+            <if test="uiType != null">
+                and uiType = #{uiType}
+            </if>
+            <if test="type != null">
+                and `type` = #{type}
+            </if>
+        </where>
+    </select>
+
+</mapper>

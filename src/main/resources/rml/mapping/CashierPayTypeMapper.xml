@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="rml.dao.CashierPayTypeMapper" >
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from cashier_pay_type
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="rml.model.CashierPayType" >
+    insert into cashier_pay_type (id,`type`, acct,
+      amount, image, status,
+      updateTime, uid, uname,
+      parentId)
+    values (#{id,jdbcType=BIGINT},#{type,jdbcType=INTEGER}, #{acct,jdbcType=VARCHAR},
+      #{amount,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
+      #{updateTime,jdbcType=TIMESTAMP}, #{uid,jdbcType=BIGINT}, #{uname,jdbcType=VARCHAR},
+      #{parentId,jdbcType=BIGINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="rml.model.CashierPayType" >
+    update cashier_pay_type
+    set `type` = #{type,jdbcType=INTEGER},
+      acct = #{acct,jdbcType=VARCHAR},
+      amount = #{amount,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      uid = #{uid,jdbcType=BIGINT},
+      uname = #{uname,jdbcType=VARCHAR},
+      parentId = #{parentId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultType="rml.model.CashierPayType" parameterType="rml.model.CashierPayType">
+    select id, `type`, acct, amount, image, status, updateTime, uid, uname, parentId
+    from cashier_pay_type
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultType="rml.model.CashierPayType" parameterType="rml.model.CashierPayType">
+    select id, `type`, acct, amount, image, status, updateTime, uid, uname, parentId
+    from cashier_pay_type
+    <where>
+      <if test="id != null">
+        and id = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="type != null">
+        and `type` = #{type,jdbcType=INTEGER}
+      </if>
+      <if test="status != null">
+        and status = #{status,jdbcType=INTEGER}
+      </if>
+      <if test="acct != null and '' != acct">
+        and acct like CONCAT('%',#{acct},'%')
+      </if>
+      <if test="amount != null and '' != amount">
+        and amount like CONCAT(#{amount},'%')
+      </if>
+      <if test="uid != null">
+        and uid = #{uid,jdbcType=BIGINT}
+      </if>
+      <if test="parentId != null">
+        and parentId = #{parentId,jdbcType=BIGINT}
+      </if>
+    </where>
+  </select>
+  <select id="selectPay" resultType="rml.model.CashierPayType" parameterType="rml.model.CashierPayType">
+      select id, `type`, acct, amount, image, status, updateTime, uid, uname, parentId from cashier_pay_type
+      where `type` = #{type,jdbcType=INTEGER} and amount in(#{amount,jdbcType=VARCHAR},'0')
+  </select>
+
+</mapper>
